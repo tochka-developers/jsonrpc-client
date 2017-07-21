@@ -1,0 +1,23 @@
+{
+    "name": "tochka-developers/jsonrpc-client",
+    "description": "JsonRpc Client for Laravel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pavel Babushkin",
+            "email": "darkdarin@tochka.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.4",
+        "illuminate/log": "~5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tochka\\JsonRpcClient\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    }
+}
