@@ -304,8 +304,10 @@ php;
             if (count($array) > 1) {
                 $array = implode(",\n\t\t\t", $array);
                 $array = "\n\t\t\t{$array}\n\t\t";
-            } else {
+            } elseif (count($array)) {
                 $array = $array[0];
+            } else {
+                $array = '';
             }
 
             $result[] = "protected function _{$methodName}({$parameters})";
