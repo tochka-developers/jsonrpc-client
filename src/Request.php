@@ -8,17 +8,19 @@ namespace Tochka\JsonRpcClient;
  */
 class Request
 {
-    private $serviceName;
-    private $method;
-    private $params;
-    private $id;
-    private $cache = null;
+    protected $serviceName;
+    protected $method;
+    protected $params;
+    protected $id;
+    protected $cache = null;
 
     /**
      * Request constructor.
+     * @param string $serviceName
      * @param string $method
-     * @param string $params
-     * @param string $idPrefix
+     * @param array $params
+     * @param string $prefix
+     * @param int $cache
      */
     public function __construct($serviceName, $method, $params, $prefix = '', $cache = null)
     {

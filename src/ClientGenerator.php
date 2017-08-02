@@ -312,7 +312,7 @@ php;
 
             $result[] = "protected function _{$methodName}({$parameters})";
             $result[] = '{';
-            $result[] = "   \$this->_call('{$methodName}', [{$array}]);";
+            $result[] = "   return \$this->_call('{$methodName}', [{$array}]);";
             $result[] = '}';
             $result[] = '';
         }

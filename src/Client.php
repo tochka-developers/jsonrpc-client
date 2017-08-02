@@ -44,9 +44,9 @@ class Client
 
     protected $serviceName = null;
 
-    private $is_batch = false;
+    protected $is_batch = false;
 
-    private $cache = null;
+    protected $cache = null;
 
     /** @var Request[] */
     protected $requests = [];
@@ -124,7 +124,7 @@ class Client
             $this->results = [];
         }
 
-        $request = new Request($this->getServiceName(), $method, $params, config('jsonrpcclient.clientName'), $this->cache);
+        $request = $this->createRequest($method, $params);
         $this->requests[$request->getId()] = $request;
         $this->results[$request->getId()] = new Response();
 
@@ -148,18 +148,16 @@ class Client
         $serviceName = $this->getServiceName();
 
         // настройки подключения
-        $host = config('jsonrpcclient.connections.' . $serviceName . '.url');
-        $key = config('jsonrpcclient.connections.' . $serviceName . '.key', null);
-        $authHeader = config('jsonrpcclient.connections.' . $serviceName . '.authHeaderName', null);
+        $settings = $this->getConnectionOptions($serviceName);
 
         $headers = ['Content-type: application/json'];
 
-        if ($authHeader !== null && $key !== null) {
-            $headers[] = $authHeader . ': ' . $key;
+        if ($settings['authHeader'] !== null && $settings['key'] !== null) {
+            $headers[] = $settings['authHeader'] . ': ' . $settings['key'];
         }
 
         // если не заданы настройки хоста
-        if (null === $host) {
+        if (null === $settings['host']) {
             Log::error('No connection settings for the service "' . $serviceName . '');
             $this->result(null, false);
             return;
@@ -185,7 +183,7 @@ class Client
         // запрос
         $json_request = json_encode($requests);
 
-        $curl = curl_init($host);
+        $curl = curl_init($settings['host']);
         curl_setopt($curl, CURLOPT_HEADER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -285,5 +283,30 @@ class Client
         } else {
             return $this->serviceName;
         }
+    }
+
+    /**
+     * Возвращает настройки подключения к сервису
+     * @param string $serviceName
+     * @return array
+     */
+    protected function getConnectionOptions($serviceName)
+    {
+        return [
+            'host' => config('jsonrpcclient.connections.' . $serviceName . '.url'),
+            'key' => config('jsonrpcclient.connections.' . $serviceName . '.key', null),
+            'authHeader' => config('jsonrpcclient.connections.' . $serviceName . '.authHeaderName', null),
+        ];
+    }
+
+    /**
+     * Создает новый запрос
+     * @param string $method
+     * @param array $params
+     * @return Request
+     */
+    protected function createRequest($method, $params)
+    {
+        return new Request($this->getServiceName(), $method, $params, config('jsonrpcclient.clientName'), $this->cache);
     }
 }
