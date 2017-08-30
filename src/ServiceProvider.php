@@ -13,5 +13,10 @@ class ServiceProvider extends BaseServiceProvider
                 ClientGenerator::class
             ]);
         }
+
+        $this->publishes([
+            __DIR__ . '/../config/jsonrpcclient.php' => base_path('config/jsonrpcclient.php'),
+        ], 'config');
+        
     }
 }

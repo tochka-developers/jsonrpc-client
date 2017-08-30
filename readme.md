@@ -5,18 +5,19 @@ JsonRpc клиент - реализация клиента для JsonRpc-сер
 ## Установка
 ### Laravel
 1. ``composer require tochka-developers/jsonrpc-client``
-2. Опубликуйте конфигурацию:  
-```
-php artisan vendor:publish
-```
-3. Если планируете использовать автоматическую генерацию прокси-клиента - необходимо подклюдчить сервис-провайдер в
+2. Если планируете использовать автоматическую генерацию прокси-клиента - необходимо подклюдчить сервис-провайдер в
 в конфигурации приложения (`config/app.php`):
 ```php
 'providers' => [
     //...
-    \Tochka\JsonRpcClient\ServiceProvider::class,
+    Tochka\JsonRpcClient\ServiceProvider::class,
 ],
 ```
+3. Опубликуйте конфигурацию:  
+```
+php artisan vendor:publish --provider="Tochka\JsonRpcClient\ServiceProvider"
+```
+
 ### Lumen
 1. ``composer require tochka-developers/jsonrpc-client``
 2. Скопируйте конфигурацию из пакета (`vendor/tochka-developers/jsonrpc/config/jsonrpc.php`) в проект (`config/jsonrpc.php`)
