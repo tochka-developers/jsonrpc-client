@@ -19,4 +19,9 @@ class ServiceProvider extends BaseServiceProvider
         ], 'config');
         
     }
+
+    public function register()
+    {
+        // TODO: Implement register() method.
+    }
 }
