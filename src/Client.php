@@ -235,7 +235,7 @@ class Client
             if (!empty($result->id) && $this->requests[$result->id]->wantCache()) {
                 $this->requests[$result->id]->setCache($this->results[$result->id]);
             }
-            return false;
+            return true;
         }
     }
 
