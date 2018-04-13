@@ -220,12 +220,14 @@ class Client
     }
 
     /**
-     * @param object $result
+     * @param $result
+     * @return bool
      */
     protected function parseResult($result)
     {
         if (!empty($result->error)) {
             $this->result(!empty($result->id) ? $result->id : null, false, null, $result->error);
+            return false;
         } else {
             $this->result(!empty($result->id) ? $result->id : null, true, $result->result);
 
@@ -233,6 +235,7 @@ class Client
             if (!empty($result->id) && $this->requests[$result->id]->wantCache()) {
                 $this->requests[$result->id]->setCache($this->results[$result->id]);
             }
+            return true;
         }
     }
 
