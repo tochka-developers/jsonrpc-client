@@ -2,7 +2,6 @@
 
 namespace Tochka\JsonRpcClient;
 
-use Symfony\Component\Console\Helper\ProgressBar;
 use Illuminate\Console\Command;
 
 class ClientGenerator extends Command
@@ -23,6 +22,7 @@ class ClientGenerator extends Command
             $config = config('jsonrpcclient.connections.' . $connection);
             if ($config === null) {
                 $this->output->error('Connection "' . $connection . '" not found!');
+
                 return;
             }
             $this->generateClient($config, $connection);
@@ -31,8 +31,10 @@ class ClientGenerator extends Command
 
     /**
      * Генерация клиента
-     * @param array $connection Настройки подключения
+     *
+     * @param array  $connection Настройки подключения
      * @param string $name Имя соединения
+     *
      * @return bool
      */
     protected function generateClient($connection, $name)
@@ -54,11 +56,15 @@ class ClientGenerator extends Command
         if (!$this->generateClass($smd, $connection, $name)) {
             return false;
         }
+
+        return true;
     }
 
     /**
      * Получение SMD-схемы от сервера
+     *
      * @param string $host Адрес сервера
+     *
      * @return bool|mixed
      */
     protected function getSmdScheme($host)
@@ -78,27 +84,34 @@ class ClientGenerator extends Command
         $result = json_decode($json_response);
         if ($result === null) {
             $this->output->error('The host did not return the SMD-scheme. Generating a client is not possible.');
+
             return false;
         }
+
         return $result;
     }
 
     /**
      * Проверка версии SMD
+     *
      * @param array $smd SMD-схема
+     *
      * @return bool
      */
     protected function checkSmd($smd)
     {
         if (empty($smd->SMDVersion) || $smd->SMDVersion !== '2.0') {
             $this->output->error('Host returned an invalid SMD-scheme. Generating a client is not possible.');
+
             return false;
         }
+
         return true;
     }
 
     /**
      * Проверка генератора SMD
+     *
      * @param string $smd SMD-схема
      */
     protected function checkGenerator($smd)
@@ -110,6 +123,7 @@ class ClientGenerator extends Command
 
     /**
      * Проверка необходимости передачи авторизационных заголовков
+     *
      * @param array $smd SMD-схема
      * @param array $connection Настройки подключения
      */
@@ -123,6 +137,7 @@ class ClientGenerator extends Command
             if ($value === '<AuthToken>' && $connection['authHeaderName'] !== $header) {
                 $this->output->note('The authorization header in the connection settings is different from what the server expects.');
                 $this->line('Right Header: ' . $header . ', Your Header: ' . $connection['authHeaderName']);
+
                 return;
             }
         }
@@ -130,14 +145,17 @@ class ClientGenerator extends Command
 
     /**
      * Непосредственно генерация прокси-класса
-     * @param array $smd SMD-схема
-     * @param array $connection Настройки подключения
+     *
+     * @param array  $smd SMD-схема
+     * @param array  $connection Настройки подключения
      * @param string $serviceName Название
+     *
+     * @return bool
      */
     protected function generateClass($smd, $connection, $serviceName)
     {
         $classInfo = $this->getClassInfo($connection);
-        if ($classInfo === false) {
+        if (null === $classInfo) {
             return false;
         }
 
@@ -174,18 +192,23 @@ php;
         file_put_contents($classInfo['filePath'], $classSource);
 
         $this->output->success('Client class "' . $connection['clientClass'] . '" successfully generated.');
+
+        return true;
     }
 
     /**
      * Возвращает информацию о классе
+     *
      * @param array $connection
-     * @return string
+     *
+     * @return array
      */
     protected function getClassInfo($connection)
     {
         if (empty($connection['clientClass'])) {
             $this->output->error('The class name for the client is not specified. Specify in the settings parameter "clientClass".');
-            return false;
+
+            return null;
         }
         $class = explode('\\', $connection['clientClass']);
 
@@ -195,13 +218,15 @@ php;
         $directory = $this->getNamespaceDirectory($result['namespace']);
         if ($directory === false) {
             $this->output->error('Specified namespace not found.');
-            return false;
+
+            return null;
         }
 
         if (!file_exists($directory)) {
-            if (!mkdir($directory, 0775, true)) {
+            if (!mkdir($directory, 0775, true) && !is_dir($directory)) {
                 $this->output->error('Can not create folder "' . $directory . '" to save class.');
-                return false;
+
+                return null;
             }
         }
 
@@ -212,25 +237,33 @@ php;
 
     /**
      * Возвращает информацию о методах
-     * @param array $smd
+     *
+     * @param \stdClass $smd
+     *
      * @return string
      */
     protected function getMethodDocs($smd)
     {
         $result = [];
         $oldGroup = null;
+
         // перебираем доступные методы
         foreach ($smd->services as $methodName => $methodInfo) {
             // если началась новая группа
             if (isset($methodInfo->group)) {
-                if ($oldGroup != $methodInfo->group) {
+                if ($oldGroup !== $methodInfo->group) {
                     $result[] = '';
                     if (!empty($methodInfo->groupName)) {
-                        $result[] = '=== ' . $methodInfo->groupName . ' ===';
+                        $ln = mb_strlen($methodInfo->groupName);
+                        $delimiter = str_pad('', $ln + 20, '=');
+                        $result[] = $delimiter;
+                        $result[] = str_pad('', 10) . $methodInfo->groupName;
+                        $result[] = $delimiter;
                     }
                 }
                 $oldGroup = $methodInfo->group;
             }
+
             // описание для метода
             if (!empty($methodInfo->description)) {
                 $result[] = preg_replace("#\n#iu", "\n *   ", $methodInfo->description);
@@ -246,7 +279,7 @@ php;
                         $paramStr = $param->type . ' ' . $paramStr;
                     }
                     if (isset($param->default)) {
-                        $paramStr .= ' = ' . $param->default;
+                        $paramStr .= ' = ' . str_replace("\n", '', var_export($param->default, true));
                     } elseif (!empty($param->optional)) {
                         $paramStr .= ' = null';
                     }
@@ -256,6 +289,7 @@ php;
             $parameters = implode(', ', $parameters);
 
             $result[] = "@method static Response {$methodName}({$parameters})";
+            $result[] = '';
         }
 
         if (empty($result)) {
@@ -267,7 +301,9 @@ php;
 
     /**
      * Возвращает реализацию методов (для маппинга ассоциативных параметров)
-     * @param array $smd
+     *
+     * @param \stdClass $smd
+     *
      * @return string
      */
     protected function getMethods($smd)
@@ -291,7 +327,7 @@ php;
                     }
 
                     if (isset($param->default)) {
-                        $paramStr .= ' = ' . $param->default;
+                        $paramStr .= ' = ' . str_replace("\n", '', var_export($param->default, true));
                     } elseif (!empty($param->optional)) {
                         $paramStr .= ' = null';
                     }
@@ -301,10 +337,10 @@ php;
             }
             $parameters = implode(', ', $parameters);
 
-            if (count($array) > 1) {
-                $array = implode(",\n\t\t\t", $array);
-                $array = "\n\t\t\t{$array}\n\t\t";
-            } elseif (count($array)) {
+            if (\count($array) > 1) {
+                $arrayStr = implode(",\n\t\t\t", $array);
+                $array = "\n\t\t\t{$arrayStr}\n\t\t";
+            } elseif (\count($array)) {
                 $array = $array[0];
             } else {
                 $array = '';
@@ -320,12 +356,15 @@ php;
         if (count($result)) {
             $prefix = "\n\n    ";
         }
+
         return $prefix . implode("\n    ", $result);
     }
 
     /**
      * Возвращает папку, в которой должен располагаться класс по его namespace
+     *
      * @param string $namespace
+     *
      * @return bool|string
      */
     private function getNamespaceDirectory($namespace)
@@ -340,6 +379,7 @@ php;
 
             if (array_key_exists($possibleNamespace, $composerNamespaces)) {
                 $path = app()->basePath() . DIRECTORY_SEPARATOR . $composerNamespaces[$possibleNamespace] . implode('/', array_reverse($undefinedNamespaceFragments));
+
                 return realpath($path);
             }
 
