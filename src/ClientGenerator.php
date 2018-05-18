@@ -6,7 +6,9 @@ use Illuminate\Console\Command;
 
 class ClientGenerator extends Command
 {
-    protected $signature = 'jsonrpc:generateClient {connection?}';
+    protected $signature = 'jsonrpc:generateClient
+                                {connection?}
+                                {--type-hints : Generate the method params with type hints}';
 
     protected $description = 'Generate proxy-client for JsonRpc server by SMD-scheme';
 
@@ -318,11 +320,21 @@ php;
             if (!empty($methodInfo->parameters)) {
                 $i = 0;
                 foreach ($methodInfo->parameters as $param) {
+                    $paramStr = '';
+
+                    if ($this->option('type-hints')) {
+                        if (in_array($param->type, ['bool', 'float', 'int', 'string'])) {
+                            $paramStr .= $param->type . ' ';
+                        } elseif (!empty($param->array)) {
+                            $paramStr .= 'array ';
+                        }
+                    }
+
                     if (empty($param->name)) {
-                        $paramStr = '$param' . ++$i;
+                        $paramStr .= '$param' . ++$i;
                         $arrayStr = '$param' . $i;
                     } else {
-                        $paramStr = '$' . $param->name;
+                        $paramStr .= '$' . $param->name;
                         $arrayStr = "'" . $param->name . "' => $" . $param->name;
                     }
 
