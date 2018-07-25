@@ -191,6 +191,18 @@ class Client
         curl_setopt($curl, CURLOPT_POSTFIELDS, $json_request);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
+ 
+       if (isset($settings['authType']) {
+            if (null === $settings['authUsername']) {
+                Log::error('No authUsername given in connection settings for the service "' . $serviceName . '"');
+            } else if (null === $settings['authPassword']) {
+                Log::error('No authPassword given in connection settings for the service "' . $serviceName . '"');
+            } else {
+                curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY); // we can adjust this according to "authType" setting, but not this time
+                curl_setopt($curl, CURLOPT_USERNAME, $settings['authUsername']);
+                curl_setopt($curl, CURLOPT_USERPWD, $settings['authPassword']);
+            }
+        }
 
         $json_response = curl_exec($curl);
         curl_close($curl);
@@ -299,7 +311,10 @@ class Client
             'host' => config('jsonrpcclient.connections.' . $serviceName . '.url'),
             'key' => config('jsonrpcclient.connections.' . $serviceName . '.key', null),
             'authHeader' => config('jsonrpcclient.connections.' . $serviceName . '.authHeaderName', null),
-        ];
+            'authType' => config('jsonrpcclient.connections.' . $serviceName . '.authType', null),
+            'authUsername' => config('jsonrpcclient.connections.' . $serviceName . '.authUsername', null),
+            'authPassword' => config('jsonrpcclient.connections.' . $serviceName . '.authPassword', null), 
+       ];
     }
 
     /**
