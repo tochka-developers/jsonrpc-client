@@ -95,7 +95,7 @@ class Request
      * Возвращает результат запроса
      * @return Response
      */
-    public function  getCache()
+    public function getCache()
     {
         return \Cache::get($this->getHash(), new Response());
     }

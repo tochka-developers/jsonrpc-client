@@ -275,7 +275,9 @@ php;
                 $i = 0;
                 foreach ($methodInfo->parameters as $param) {
                     $paramStr = !empty($param->name) ? '$' . $param->name : '$param' . ++$i;
-                    if (!empty($param->type)) {
+                    if (!empty($param->array)) {
+                        $paramStr = 'array ' . $paramStr;
+                    } elseif (!empty($param->type)) {
                         $paramStr = $param->type . ' ' . $paramStr;
                     }
                     if (isset($param->default)) {
@@ -348,7 +350,7 @@ php;
 
             $result[] = "protected function _{$methodName}({$parameters})";
             $result[] = '{';
-            $result[] = "   return \$this->_call('{$methodName}', [{$array}]);";
+            $result[] = "    return \$this->_call('{$methodName}', [{$array}]);";
             $result[] = '}';
             $result[] = '';
         }
