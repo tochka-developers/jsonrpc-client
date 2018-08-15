@@ -331,6 +331,16 @@ php;
                         $arrayStr = "'" . $param->name . "' => $" . $param->name;
                     }
 
+                    if (!empty($param->array)) {
+                        $paramStr = 'array ' . $paramStr;
+                    } elseif (!empty($param->types)) {
+                        $type = $this->getCorrectParameterType($param->types);
+
+                        if (null !== $type) {
+                            $paramStr = $type . ' ' . $paramStr;
+                        }
+                    }
+
                     if (isset($param->default)) {
                         $paramStr .= ' = ' . str_replace("\n", '', var_export($param->default, true));
                     } elseif (!empty($param->optional)) {
@@ -404,6 +414,42 @@ php;
         $composerConfig = json_decode(file_get_contents($composerJsonPath));
 
         return (array)$composerConfig->autoload->{'psr-4'};
+    }
+
+    /**
+     * Возвращает корректный тип параметра
+     *
+     * @param $types
+     *
+     * @return string
+     */
+    private function getCorrectParameterType($types)
+    {
+        $currentType = null;
+        $nullable = false;
+
+        foreach ($types as $type) {
+            switch ($type) {
+                case 'mixed':
+                    break;
+                case 'null':
+                    $nullable = true;
+                    break;
+                case 'object':
+                    $type = '\StdClass';
+                    break;
+            }
+
+            if (null === $currentType) {
+                $currentType = $type;
+            }
+        }
+
+        if ($nullable) {
+            $currentType = '?' . $currentType;
+        }
+
+        return $currentType;
     }
 
 }
