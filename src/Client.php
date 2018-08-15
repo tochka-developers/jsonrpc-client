@@ -82,7 +82,7 @@ class Client
         if (method_exists($this, '_' . $method)) {
             return $this->{'_' . $method}(...$params);
         }
-        
+
         return $this->_call($method, $params);
     }
 
@@ -166,7 +166,7 @@ class Client
         $serviceName = $this->getServiceName();
 
         // настройки подключения
-        $settings = $this->getConnectionOptions($serviceName);
+        $settings = self::getConnectionOptions($serviceName);
 
         $headers = ['Content-type: application/json'];
 
@@ -335,15 +335,16 @@ class Client
      *
      * @return array
      */
-    protected function getConnectionOptions($serviceName)
+    public static function getConnectionOptions($serviceName)
     {
         $headerToken = config('jsonrpcclient.connections.' . $serviceName . '.auth.headerToken', null);
         $httpAuth = config('jsonrpcclient.connections.' . $serviceName . '.auth.http', null);
 
-        $headerToken = $this->getOldConnectionOptions($serviceName, $headerToken);
+        $headerToken = self::getOldConnectionOptions($serviceName, $headerToken);
 
         return [
             'host' => config('jsonrpcclient.connections.' . $serviceName . '.url'),
+            'clientClass' => config('jsonrpcclient.connections.' . $serviceName . '.clientClass'),
             'auth' => [
                 'headerToken' => $headerToken,
                 'http'        => $httpAuth,
@@ -357,7 +358,7 @@ class Client
      *
      * @return mixed
      */
-    protected function getOldConnectionOptions($serviceName, $headerToken)
+    public static function getOldConnectionOptions($serviceName, $headerToken)
     {
         $name = config('jsonrpcclient.connections.' . $serviceName . '.authHeaderName', null);
         $key = config('jsonrpcclient.connections.' . $serviceName . '.key', null);

@@ -16,7 +16,7 @@ class ClientGenerator extends Command
         if ($connection === null) {
             $connections = config('jsonrpcclient.connections');
             foreach ($connections as $key => $connection) {
-                $this->generateClient($connection, $key);
+                $this->generateClient($key);
             }
         } else {
             $config = config('jsonrpcclient.connections.' . $connection);
@@ -25,7 +25,7 @@ class ClientGenerator extends Command
 
                 return;
             }
-            $this->generateClient($config, $connection);
+            $this->generateClient($connection);
         }
     }
 
@@ -37,9 +37,10 @@ class ClientGenerator extends Command
      *
      * @return bool
      */
-    protected function generateClient($connection, $name)
+    protected function generateClient($name)
     {
-        $smd = $this->getSmdScheme($connection['url'] . '?smd');
+        $connection = Client::getConnectionOptions($name);
+        $smd = $this->getSmdScheme($connection['host'] . '?smd');
 
         if (!$smd) {
             return false;
@@ -134,7 +135,9 @@ class ClientGenerator extends Command
         }
 
         foreach ($smd->additionalHeaders as $header => $value) {
-            if ($value === '<AuthToken>' && $connection['authHeaderName'] !== $header) {
+            $headerName = $connection['auth']['headerToken']['name'] ? $connection['auth']['headerToken']['name'] : '';
+
+            if ($value === '<AuthToken>' && $headerName !== $header) {
                 $this->output->note('The authorization header in the connection settings is different from what the server expects.');
                 $this->line('Right Header: ' . $header . ', Your Header: ' . $connection['authHeaderName']);
 
