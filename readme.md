@@ -53,8 +53,8 @@ $app->register(Tochka\JsonRpcClient\ServiceProvider::class);
 + `auth.http` - HTTP-аутентификация
  - `auth.http.scheme` - схема аутентификации. Возможные варианты: `basic`, `digest`, `ntlm`, `gss`, `any` (включает все 
 схемы - basic, digest, ntlm, gss), `safe` (включает только безопасные схемы - digest, ntlm, gss)
- - `auth.headerToken.username` - имя пользователя
- - `auth.headerToken.password` - пароль
+ - `auth.http.username` - имя пользователя
+ - `auth.http.password` - пароль
 * `key` - токен авторизации. Если на сервере не используется авторизация по заголовку - можно не указывать.
 * `clientClass` - класс, который используется в качестве прокси-класса. Необходимо указывать полное наименование 
 (с пространством имен). Используется при автоматической генерации прокси-класса.
