@@ -202,6 +202,12 @@ class Client
             return;
         }
 
+        // handle single request case: send request without using array
+        // this is usable for old-fashion JSON-RPC servers not able to handle multiple requests in a single call
+        if (count($requests)==1) {
+            $requests = $requests[0];
+        }
+
         // запрос
         $json_request = json_encode($requests);
 
