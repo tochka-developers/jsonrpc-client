@@ -2,7 +2,11 @@
 
 namespace Tochka\JsonRpcClient;
 
-use Illuminate\Support\Facades\Log;
+use phpDocumentor\Reflection\DocBlockFactory;
+use Tochka\JsonRpcClient\Contracts\Middleware;
+use Tochka\JsonRpcClient\DocBlock\Method;
+use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
+use Tochka\JsonRpcClient\Exceptions\ResponseException;
 
 /**
  * Class Client
@@ -12,62 +16,36 @@ use Illuminate\Support\Facades\Log;
  * @method static static batch()
  * @method static static cache($minutes = -1)
  * @method static execute()
- * @method static Response call(string $method, array $params)
+ * @method static EmptyResponse call(string $method, array $params)
  */
 class Client
 {
-    const CODE_PARSE_ERROR = -32700;
-    const CODE_INVALID_REQUEST = -32600;
-    const CODE_METHOD_NOT_FOUND = -32601;
-    const CODE_INVALID_PARAMS = -32602;
-    const CODE_INTERNAL_ERROR = -32603;
-    const CODE_INVALID_PARAMETERS = 6000;
-    const CODE_VALIDATION_ERROR = 6001;
-    const CODE_UNAUTHORIZED = 7000;
-    const CODE_FORBIDDEN = 7001;
-    const CODE_EXTERNAL_INTEGRATION_ERROR = 8000;
-    const CODE_INTERNAL_INTEGRATION_ERROR = 8001;
-
-    const HTTP_AUTH_NONE = 'none';
-    const HTTP_AUTH_BASIC = 'basic';
-    const HTTP_AUTH_DIGEST = 'digest';
-    const HTTP_AUTH_NTLM = 'ntlm';
-    const HTTP_AUTH_GSS = 'gss';
-    const HTTP_AUTH_ANY = 'any';
-    const HTTP_AUTH_SAFE = 'safe';
-
-    public static $jsonrpc_messages = [
-        self::CODE_PARSE_ERROR                => 'Ошибка обработки запроса',
-        self::CODE_INVALID_REQUEST            => 'Неверный запрос',
-        self::CODE_METHOD_NOT_FOUND           => 'Указанный метод не найден',
-        self::CODE_INVALID_PARAMS             => 'Неверные параметры',
-        self::CODE_INTERNAL_ERROR             => 'Внутренняя ошибка',
-        self::CODE_INVALID_PARAMETERS         => 'Неверные параметры',
-        self::CODE_VALIDATION_ERROR           => 'Ошибка валидации',
-        self::CODE_UNAUTHORIZED               => 'Неверный ключ авторизации',
-        self::CODE_FORBIDDEN                  => 'Доступ запрещен',
-        self::CODE_EXTERNAL_INTEGRATION_ERROR => 'Ошибка внешних сервисов',
-        self::CODE_INTERNAL_INTEGRATION_ERROR => 'Ошибка внутренних сервисов',
-    ];
-
     protected $serviceName;
+    protected $namedParameters = true;
+    protected $config;
 
     protected $is_batch = false;
 
     protected $cache;
 
-    /** @var Request[] */
+    /** @var JsonRpcRequest[] */
     protected $requests = [];
 
-    /** @var Response[] */
+    /** @var array */
     protected $results = [];
 
-    private $time = 0;
+    /** @var DocBlockFactory */
+    protected $docFactory;
 
-    public function __construct()
+    public function __construct($serviceName = null, $namedParameters = true)
     {
         $this->requests = [];
         $this->results = [];
+        $this->serviceName = $serviceName;
+        $this->namedParameters = $namedParameters;
+        $this->config = Config::create($this->serviceName);
+
+        $this->docFactory = DocBlockFactory::createInstance(['method' => Method::class]);
     }
 
     public static function __callStatic($method, $params)
@@ -77,6 +55,13 @@ class Client
         return $instance->$method(...$params);
     }
 
+    /**
+     * @param $method
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public function __call($method, $params)
     {
         if (method_exists($this, '_' . $method)) {
@@ -86,6 +71,7 @@ class Client
         return $this->_call($method, $params);
     }
 
+    /** @noinspection MagicMethodsValidityInspection */
     /**
      * Устанавливает имя сервиса для текущего экземпляра клиента
      *
@@ -93,9 +79,10 @@ class Client
      *
      * @return $this
      */
-    protected function _get($serviceName)
+    protected function _get($serviceName): self
     {
         $this->serviceName = $serviceName;
+        $this->config = Config::create($serviceName);
 
         return $this;
     }
@@ -104,7 +91,7 @@ class Client
      * Помечает экземпляр клиента как массив вызовов
      * @return $this
      */
-    protected function _batch()
+    protected function _batch(): self
     {
         $this->requests = [];
         $this->results = [];
@@ -120,31 +107,44 @@ class Client
      *
      * @return $this
      */
-    protected function _cache($minutes = -1)
+    protected function _cache($minutes = -1): self
     {
         $this->cache = $minutes;
 
         return $this;
     }
 
+    /** @noinspection MagicMethodsValidityInspection */
     /**
      * Выполняет удаленный вызов (либо добавляет его в массив)
      *
      * @param string $method
-     * @param array  $params
+     * @param array $params
      *
-     * @return Response
+     * @return mixed
+     * @throws \Exception
      */
     protected function _call($method, $params)
     {
+        if ($this->namedParameters) {
+            $params = $this->getNamedParameters($method, $params);
+        }
+
         if (!$this->is_batch) {
             $this->requests = [];
             $this->results = [];
         }
 
-        $request = $this->createRequest($method, $params);
+        $request = new JsonRpcRequest(
+            $this->config->serviceName,
+            $method,
+            $params,
+            $this->config->clientName,
+            $this->cache
+        );
+
         $this->requests[$request->getId()] = $request;
-        $this->results[$request->getId()] = new Response();
+        $this->results[$request->getId()] = new EmptyResponse();
 
         $this->cache = null;
 
@@ -157,35 +157,49 @@ class Client
 
     /**
      * Выполняет запрос всех вызовов
+     * @throws JsonRpcClientException
      */
-    protected function _execute()
+    protected function _execute(): void
     {
-        $this->time = microtime(true);
+        $client = new HttpClient($this->config->url);
 
-        // имя сервиса
-        $serviceName = $this->getServiceName();
+        $requests = $this->getRequestsBody();
 
-        // настройки подключения
-        $settings = self::getConnectionOptions($serviceName);
-
-        $headers = ['Content-type: application/json'];
-
-        if (null !== $settings['auth']['headerToken']) {
-            $name = isset($settings['auth']['headerToken']['name']) ? $settings['auth']['headerToken']['name'] : '';
-            $key = isset($settings['auth']['headerToken']['key']) ? $settings['auth']['headerToken']['key'] : '';
-
-            $headers[] = $name . ': ' . $key;
-        }
-
-        // если не заданы настройки хоста
-        if (null === $settings['host']) {
-            Log::error('No connection settings for the service "' . $serviceName . '');
-            $this->result(null, false);
-
+        if (!\count($requests)) {
             return;
         }
+        $client->setBody($requests);
 
-        // формируем запросы
+        foreach ($this->config->middleware as $middleware => $options) {
+            $this->handleMiddleware($client, $middleware, $options);
+        }
+
+        $json_response = $client->get();
+        $response = json_decode($json_response);
+
+        // ошибка декодирования Json
+        if (null === $response) {
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_RESPONSE_PARSE_ERROR);
+        }
+
+        if (\is_array($response)) {
+            // если вернулся массив результатов
+            foreach ($response as $result) {
+                $this->parseResult($result);
+            }
+        } else {
+            $this->parseResult($response);
+        }
+
+        $this->requests = [];
+    }
+
+    /**
+     * Возвращает содержимое всех запросов
+     * @return array
+     */
+    protected function getRequestsBody(): array
+    {
         $requests = [];
 
         foreach ($this->requests as $request) {
@@ -197,75 +211,41 @@ class Client
             }
         }
 
-        // если нет запросов - ничего не делаем
-        if (!count($requests)) {
-            return;
+        return $requests;
+    }
+
+    /**
+     * Вызывает обработчики
+     *
+     * @param $client
+     * @param $middleware
+     * @param $options
+     */
+    protected function handleMiddleware($client, $middleware, $options): void
+    {
+        if (\is_array($options)) {
+            $instance = new $middleware($options);
+        } else {
+            $instance = new $options();
         }
 
-        // запрос
-        $json_request = json_encode($requests);
-
-        $curl = curl_init($settings['host']);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $json_request);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-
-        // если необходимо http аутентификация
-        if (null !== $settings['auth']['http']) {
-            $scheme = isset($settings['auth']['http']['scheme']) ? $settings['auth']['http']['scheme'] : 'none';
-            $authType = $this->getHttpAuthScheme($scheme);
-
-            if (null !== $authType) {
-                $username = isset($settings['auth']['http']['username']) ? $settings['auth']['http']['username'] : '';
-                $password = isset($settings['auth']['http']['password']) ? $settings['auth']['http']['password'] : '';
-
-                curl_setopt($curl, CURLOPT_HTTPAUTH, $authType);
-                curl_setopt($curl, CURLOPT_USERPWD, $username . ':' . $password);
-            }
+        if (!$instance instanceof Middleware) {
+            throw new \LogicException(\get_class($instance) . ' must be instance of Tochka\JsonRpcClient\Contracts\Middleware interface');
         }
 
-        $json_response = curl_exec($curl);
-        curl_close($curl);
-        $response = json_decode($json_response);
-
-        // ошибка декодирования Json
-        if (null === $response) {
-            Log::error('Error parsing response from Api. An error has occurred on the server. ' . $this->getLogInfo($json_request, $json_response));
-            $this->result(null, false);
-
-            return;
-        }
-
-
-        if (is_array($response)) {
-            // если вернулся массив результатов
-            foreach ($response as $result) {
-                if (!$this->parseResult($result)) {
-                    Log::error('JsonRpc error (' . $serviceName . '). ' . $this->getLogInfo($json_request, $json_response));
-                }
-            }
-        } elseif (!$this->parseResult($response)) {
-            Log::error('JsonRpc error (' . $serviceName . '). ' . $this->getLogInfo($json_request, $json_response));
-        }
-
-        $this->requests = [];
+        $instance->handle($client, $this->config);
     }
 
     /**
      * @param $result
      *
      * @return bool
+     * @throws ResponseException
      */
-    protected function parseResult($result)
+    protected function parseResult($result): bool
     {
         if (!empty($result->error)) {
-            $this->result(!empty($result->id) ? $result->id : null, false, null, $result->error);
-
-            return false;
+            throw new ResponseException($result->error);
         }
 
         $this->result(!empty($result->id) ? $result->id : null, true, $result->result);
@@ -282,11 +262,11 @@ class Client
      * Заполняет результат указанными данными
      *
      * @param string $id ID вызова. Если NULL, то будет заполнен результат всех вызовов
-     * @param bool   $success Успешен ли вызов
+     * @param bool $success Успешен ли вызов
      * @param object $data Ответ вызова
      * @param object $error Текст ошибки
      */
-    protected function result($id, $success, $data = null, $error = null)
+    protected function result($id, $success, $data = null, $error = null): void
     {
         if (null === $id) {
             foreach ($this->results as $key => $value) {
@@ -295,123 +275,44 @@ class Client
                 }
             }
         } else {
-            if (!isset($this->results[$id])) {
-                $this->results[$id] = new Response();
-            }
-
-            $this->results[$id]->success = $success;
-            if (null !== $data) {
-                $this->results[$id]->data = $data;
-            }
-            if (null !== $error) {
-                $this->results[$id]->error = $error;
-            }
+            $this->results[$id] = $data;
         }
     }
 
-    private function getLogInfo($json_request, $json_response)
-    {
-        return 'Request: ' . var_export($json_request, true) . '<br />Response: ' . var_export($json_response, true);
-    }
-
     /**
-     * Возвращает имя текущего сервиса
-     * @return string
-     */
-    public function getServiceName()
-    {
-        // имя сервиса
-        if ($this->serviceName === null) {
-            return config('jsonrpcclient.default');
-        }
-
-        return $this->serviceName;
-    }
-
-    /**
-     * Возвращает настройки подключения к сервису
+     * Подготавливает запрос с именованными параметрами, забирая информацию об именах параметров из описания метода
      *
-     * @param string $serviceName
+     * @param string $methodName
+     * @param array $params
      *
      * @return array
+     * @throws \ReflectionException
      */
-    public static function getConnectionOptions($serviceName)
+    protected function getNamedParameters(string $methodName, array $params): array
     {
-        $headerToken = config('jsonrpcclient.connections.' . $serviceName . '.auth.headerToken', null);
-        $httpAuth = config('jsonrpcclient.connections.' . $serviceName . '.auth.http', null);
+        $reflection = new \ReflectionClass($this);
+        $docs = $reflection->getDocComment();
 
-        $headerToken = self::getOldConnectionOptions($serviceName, $headerToken);
+        $docBlock = $this->docFactory->create($docs);
+        /** @var Method[] $methods */
+        $methods = $docBlock->getTagsByName('method');
 
-        return [
-            'host' => config('jsonrpcclient.connections.' . $serviceName . '.url'),
-            'clientClass' => config('jsonrpcclient.connections.' . $serviceName . '.clientClass'),
-            'auth' => [
-                'headerToken' => $headerToken,
-                'http'        => $httpAuth,
-            ],
-        ];
-    }
+        $inputArguments = [];
 
-    /**
-     * @param string $serviceName
-     * @param array $headerToken
-     *
-     * @return mixed
-     */
-    public static function getOldConnectionOptions($serviceName, $headerToken)
-    {
-        $name = config('jsonrpcclient.connections.' . $serviceName . '.authHeaderName', null);
-        $key = config('jsonrpcclient.connections.' . $serviceName . '.key', null);
+        foreach ($methods as $method) {
+            if ($method->getMethodName() !== $methodName) {
+                continue;
+            }
 
-        if (null === $headerToken && null !== $name && null !== $key) {
-            $headerToken = [
-                'name' => $name,
-                'key'  => $key,
-            ];
+            $arguments = $method->getArguments();
+
+            for ($i = 0, $iMax = \count($params); $i < $iMax; $i++) {
+                if (isset($arguments[$i])) {
+                    $inputArguments[$arguments[$i]['name']] = $params[$i];
+                }
+            }
         }
 
-        return $headerToken;
-    }
-
-    /**
-     * Возвращает тип авторизации для CURL исходя из нашего алиаса
-     *
-     * @param $scheme
-     *
-     * @return int|null
-     */
-    protected function getHttpAuthScheme($scheme)
-    {
-        switch ($scheme) {
-            case self::HTTP_AUTH_NONE:
-                return null;
-            case self::HTTP_AUTH_BASIC:
-                return CURLAUTH_BASIC;
-            case self::HTTP_AUTH_DIGEST:
-                return CURLAUTH_DIGEST;
-            case self::HTTP_AUTH_GSS:
-                return CURLAUTH_GSSNEGOTIATE;
-            case self::HTTP_AUTH_NTLM:
-                return CURLAUTH_NTLM;
-            case self::HTTP_AUTH_ANY:
-                return CURLAUTH_ANY;
-            case self::HTTP_AUTH_SAFE:
-                return CURLAUTH_ANYSAFE;
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * Создает новый запрос
-     *
-     * @param string $method
-     * @param array  $params
-     *
-     * @return Request
-     */
-    protected function createRequest($method, $params)
-    {
-        return new Request($this->getServiceName(), $method, $params, config('jsonrpcclient.clientName'), $this->cache);
+        return $inputArguments;
     }
 }

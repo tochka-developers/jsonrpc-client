@@ -2,32 +2,34 @@
 
 namespace Tochka\JsonRpcClient;
 
-/**
- * Class Request
- * @package Tochka\JsonRpcClient
- */
-class Request
+use Illuminate\Support\Facades\Cache;
+
+class JsonRpcRequest
 {
     protected $serviceName;
     protected $method;
     protected $params;
     protected $id;
-    protected $cache = null;
+    protected $cache;
+
+    protected $headers = [];
+    protected $body = [];
 
     /**
      * Request constructor.
+     *
      * @param string $serviceName
      * @param string $method
      * @param array $params
-     * @param string $prefix
+     * @param string $clientName
      * @param int $cache
      */
-    public function __construct($serviceName, $method, $params, $prefix = '', $cache = null)
+    public function __construct($serviceName, $method, $params, $clientName, $cache)
     {
         $this->serviceName = $serviceName;
         $this->method = $method;
         $this->params = $params;
-        $this->id = $this->generateId($prefix);
+        $this->id = $this->generateId($clientName);
         $this->cache = $cache;
     }
 
@@ -35,7 +37,7 @@ class Request
      * Возвращает уникальный идентификатор запроса
      * @return string
      */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
@@ -44,31 +46,33 @@ class Request
      * Возвращает массив запроса
      * @return array
      */
-    public function getRequest()
+    public function getRequest(): array
     {
         return [
             'jsonrpc' => '2.0',
-            'method' => $this->method,
-            'params' => $this->params,
-            'id' => $this->id
+            'method'  => $this->method,
+            'params'  => $this->params,
+            'id'      => $this->id,
         ];
     }
 
     /**
      * Генерирует уникальный идентификатор запроса
+     *
      * @param string $prefix
+     *
      * @return string
      */
-    public function generateId($prefix = '')
+    public function generateId($prefix = ''): string
     {
-        return uniqid($prefix);
+        return uniqid($prefix, false);
     }
 
     /**
      * Возвращает уникальный хеш запроса
      * @return string
      */
-    public function getHash()
+    public function getHash(): string
     {
         return $this->serviceName . '.' . $this->method . '?' . md5(json_encode($this->params));
     }
@@ -77,35 +81,36 @@ class Request
      * Проверяет, есть ли закешированный результат для данного запроса
      * @return bool
      */
-    public function hasCache()
+    public function hasCache(): bool
     {
-        return $this->cache !== null && \Cache::has($this->getHash());
+        return $this->cache !== null && Cache::has($this->getHash());
     }
 
     /**
      * Проверяет, необходимо ли сохранить результат запроса в кеш
      * @return bool
      */
-    public function wantCache()
+    public function wantCache(): bool
     {
         return $this->cache !== null;
     }
 
     /**
      * Возвращает результат запроса
-     * @return Response
+     * @return mixed
      */
     public function getCache()
     {
-        return \Cache::get($this->getHash(), new Response());
+        return Cache::get($this->getHash(), new EmptyResponse());
     }
 
     /**
      * Сохраняет результат запроса в кеш
-     * @param Response $response
+     *
+     * @param mixed $response
      */
-    public function setCache($response)
+    public function setCache($response): void
     {
-        \Cache::put($this->getHash(), $response, $this->cache);
+        Cache::put($this->getHash(), $response, $this->cache);
     }
 }

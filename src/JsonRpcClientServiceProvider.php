@@ -2,26 +2,22 @@
 
 namespace Tochka\JsonRpcClient;
 
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Support\ServiceProvider;
+use Tochka\JsonRpcClient\Console\GenerateClient;
 
-class ServiceProvider extends BaseServiceProvider
+class JsonRpcClientServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                ClientGenerator::class
+                GenerateClient::class,
             ]);
         }
 
         $this->publishes([
             __DIR__ . '/../config/jsonrpcclient.php' => base_path('config/jsonrpcclient.php'),
         ], 'config');
-        
-    }
 
-    public function register()
-    {
-        // TODO: Implement register() method.
     }
 }
