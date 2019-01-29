@@ -18,13 +18,13 @@ class Config
     {
         $instance = new self();
 
-        $instance->serviceName = $serviceName ?? config('jsonrpcclient.default');
+        $instance->serviceName = $serviceName ?? config('jsonrpc-client.default');
 
-        $instance->clientName = config('jsonrpcclient.clientName');
-        $instance->url = config('jsonrpcclient.connections.' . $serviceName . '.url');
-        $instance->middleware = config('jsonrpcclient.connections.' . $serviceName . '.middleware', []);
-        $instance->clientClass = config('jsonrpcclient.connections.' . $serviceName . '.clientClass');
-        $instance->extendedStubs = config('jsonrpcclient.connections.' . $serviceName . '.extendedStubs', false);
+        $instance->clientName = config('jsonrpc-client.clientName');
+        $instance->url = config('jsonrpc-client.connections.' . $serviceName . '.url');
+        $instance->middleware = config('jsonrpc-client.connections.' . $serviceName . '.middleware', []);
+        $instance->clientClass = config('jsonrpc-client.connections.' . $serviceName . '.clientClass');
+        $instance->extendedStubs = config('jsonrpc-client.connections.' . $serviceName . '.extendedStubs', false);
 
         return $instance;
     }

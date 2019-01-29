@@ -16,7 +16,7 @@ class JsonRpcClientServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__ . '/../config/jsonrpcclient.php' => base_path('config/jsonrpcclient.php'),
+            __DIR__ . '/../config/jsonrpc-client.php' => base_path('config/jsonrpc-client.php'),
         ], 'config');
 
     }

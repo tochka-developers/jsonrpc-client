@@ -15,6 +15,8 @@ return [
             'url'         => 'https://api.jsonrpc.com/v1/jsonrpc',
             // Имя прокси-класса для данного соединения
             'clientClass' => '\\App\\Api\\Client',
+            // Генерация расширенного описания АПИ в виде классов-хелперов для входных и выходных параметров методов
+            'extendedStubs' => false,
             'middleware'  => [
                 \Tochka\JsonRpcClient\Middleware\AuthTokenMiddleware::class => [
                     'name'  => 'X-Access-Key',

@@ -1,42 +1,35 @@
-# JSON-RPC Client (Laravel 5, Lumen 5)
+# JSON-RPC Client (Laravel 5.6, Lumen 5.6)
 ## Описание
 JsonRpc клиент - реализация клиента для JsonRpc-сервера.
 Работает по спецификации JsonRpc 2.0. Протестирован и работает с оригинальным сервером JsonRpc от Tochka.
 ## Установка
 ### Laravel
 1. ``composer require tochka-developers/jsonrpc-client``
-2. Если планируете использовать автоматическую генерацию прокси-клиента - необходимо подклюдчить сервис-провайдер в
-в конфигурации приложения (`config/app.php`):
-```php
-'providers' => [
-    //...
-    Tochka\JsonRpcClient\ServiceProvider::class,
-],
+2. Опубликуйте конфигурацию:  
 ```
-3. Опубликуйте конфигурацию:  
-```
-php artisan vendor:publish --provider="Tochka\JsonRpcClient\ServiceProvider"
+php artisan vendor:publish --provider="Tochka\JsonRpcClient\JsonRpcClientServiceProvider"
 ```
 
 ### Lumen
 1. ``composer require tochka-developers/jsonrpc-client``
-2. Скопируйте конфигурацию из пакета (`vendor/tochka-developers/jsonrpc/config/jsonrpc.php`) в проект (`config/jsonrpc.php`)
+2. Скопируйте конфигурацию из пакета (`vendor/tochka-developers/jsonrpc/config/jsonrpc-client.php`) в проект 
+(`config/jsonrpc-client.php`)
 3. Подключите конфигурацию в `bootstrap/app.php`:
 ```php
-$app->configure('jsonrpc');
+$app->configure('jsonrpc-client');
 ```
 4. Включите поддержку фасадов в `bootstrap/app.php`:
 ```php
 $app->withFacades();
 ```
 5. Если планируете использовать автоматическую генерацию прокси-клиента - зарегистрируйте сервис-провайдер 
-`Tochka\JsonRpcClient\ServiceProvider` в `bootstrap/app.php`:
+`Tochka\JsonRpcClient\JsonRpcClientServiceProvider` в `bootstrap/app.php`:
 ```php
-$app->register(Tochka\JsonRpcClient\ServiceProvider::class);
+$app->register(Tochka\JsonRpcClient\JsonRpcClientServiceProvider::class);
 ```
 ## Использование
 ### Настройка
-Конфигурация находится в файле `app/jsonrpcclient.php`. 
+Конфигурация находится в файле `app/jsonrpc-client.php`. 
 В данном файле прописываются настройки для всех JsonRpc-подключений.
 * `clientName` - Имя клиента. Данное имя будет подставляться в ID-всех запросов в виде префикса.
 Позволяет идентифицировать сервис.
@@ -46,18 +39,18 @@ $app->register(Tochka\JsonRpcClient\ServiceProvider::class);
 Настройки подключений:
 * `url` - URL-адрес (или IP) для подключения к JsonRpc-серверу. Должен содержать полный путь к точке входа
 (например: https://api.jsonrpc.com/v1/jsonrpc).
-* `auth` - настройки аутентификации. Доступно два вида аутентификации:
-+ `auth.headerToken` - аутентификации с помощью токена в заголовке. Для настройки внутри используются параметры:
- - `auth.headerToken.name` - имя заголовка
- - `auth.headerToken.key` - передаваемый в заголовке ключ
-+ `auth.http` - HTTP-аутентификация
- - `auth.http.scheme` - схема аутентификации. Возможные варианты: `basic`, `digest`, `ntlm`, `gss`, `any` (включает все 
-схемы - basic, digest, ntlm, gss), `safe` (включает только безопасные схемы - digest, ntlm, gss)
- - `auth.headerToken.username` - имя пользователя
- - `auth.headerToken.password` - пароль
-* `key` - токен авторизации. Если на сервере не используется авторизация по заголовку - можно не указывать.
 * `clientClass` - класс, который используется в качестве прокси-класса. Необходимо указывать полное наименование 
 (с пространством имен). Используется при автоматической генерации прокси-класса.
+* `extendedStubs` - генерация расширенного описания АПИ в виде классов-хелперов для входных и выходных параметров методов
+* `middleware` - список классов-middleware, которые подготавливают запрос перед отправкой. Возможно перечисление 
+классов-middleware в виде элементов массива, либо, если необходимо передать в класс дополнительные параметры - в качестве
+ключей массива указываются классы-middleware, в качестве значения - массив с параметрами.
+В пакете доступно две middleware:
+* `AuthTokenMiddleware` - класс авторизации по токену в заголовке. Параметры: `name` - имя заголовка, `value` - значение 
+токена
+* `AuthBasicMiddleware` - класс Basic-авторизации. Параметры: `scheme` - тип авторизации (`basic`, `digest`, `ntlm`), 
+`username` и `password` - данные для авторизации
+
 ### Вызовы без прокси-класса
 Вызов метода JsonRpc:
 ```php
@@ -147,4 +140,43 @@ $resultFoo = $api->cache(10)->foo('params');
 $resultBar = $api->bar(123);
 $resultSome = $api->cache(60)->someMethod(1, true);
 $api->execute();
+```
+
+### Middleware
+Классы-middleware позволяет внести изменения в исходящие запросы, например добавить дополнительные заголовки, включить 
+авторизацию, либо внести изменения в само тело запроса. 
+
+Вы можете использовать свои классы, указав их имена в конфигурации необходимого подключения.
+Класс-middleware должен реализовывать интерфейс `Tochka\JsonRpcClient\Contracts\Middleware`.
+В конструктор middleware при создании передаются параметры, указанные в конфигурации. Пример:
+```php
+// config
+'middleware'  => [
+    \Tochka\JsonRpcClient\Middleware\AuthTokenMiddleware::class => [
+        'name'  => 'X-Access-Key',
+        'value' => 'TokenValue',
+    ],
+]
+
+// class
+use Tochka\JsonRpcClient\Config;
+use Tochka\JsonRpcClient\Contracts\Middleware;
+use Tochka\JsonRpcClient\HttpClient;
+
+class AuthTokenMiddleware implements Middleware
+{
+    protected $name;
+    protected $value;
+
+    public function __construct($options)
+    {
+        $this->name = $options['name'] ?? 'X-Access-Key';
+        $this->value = $options['value'] ?? '';
+    }
+
+    public function handle(HttpClient $client, Config $config): void
+    {
+        $client->setHeader($this->name, $this->value);
+    }
+}
 ```

@@ -20,7 +20,7 @@ class GenerateClient extends Command
         $connection = $this->argument('connection');
 
         if ($connection === null) {
-            $connections = config('jsonrpcclient.connections');
+            $connections = config('jsonrpc-client.connections');
             foreach ($connections as $key => $connection) {
                 $this->generate($connection);
             }
