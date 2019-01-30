@@ -202,6 +202,10 @@ class Client
             return;
         }
 
+        if (count($requests) === 1) {
+            $requests = $requests[0];
+        }
+
         // запрос
         $json_request = json_encode($requests);
 
