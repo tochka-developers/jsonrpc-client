@@ -168,6 +168,10 @@ class Client
         if (!\count($requests)) {
             return;
         }
+        if (\count($requests) === 1) {
+            $requests = $requests[0];
+        }
+
         $client->setBody($requests);
 
         foreach ($this->config->middleware as $middleware => $options) {
