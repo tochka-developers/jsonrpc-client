@@ -2,16 +2,14 @@
 
 namespace Tochka\JsonRpcClient;
 
-use phpDocumentor\Reflection\DocBlockFactory;
 use Tochka\JsonRpcClient\Contracts\Middleware;
-use Tochka\JsonRpcClient\DocBlock\Method;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\Exceptions\ResponseException;
 
 /**
  * Class Client
- * @package Tochka\JsonRpcClient
  *
+ * @package Tochka\JsonRpcClient
  * @method static static get(string $serviceName)
  * @method static static batch()
  * @method static static cache($minutes = -1)
@@ -34,9 +32,6 @@ class Client
     /** @var array */
     protected $results = [];
 
-    /** @var DocBlockFactory */
-    protected $docFactory;
-
     public function __construct($serviceName = null, $namedParameters = true)
     {
         $this->requests = [];
@@ -44,8 +39,6 @@ class Client
         $this->serviceName = $serviceName;
         $this->namedParameters = $namedParameters;
         $this->config = Config::create($this->serviceName);
-
-        $this->docFactory = DocBlockFactory::createInstance(['method' => Method::class]);
     }
 
     public static function __callStatic($method, $params)
@@ -89,6 +82,7 @@ class Client
 
     /**
      * Помечает экземпляр клиента как массив вызовов
+     *
      * @return $this
      */
     protected function _batch(): self
@@ -119,7 +113,7 @@ class Client
      * Выполняет удаленный вызов (либо добавляет его в массив)
      *
      * @param string $method
-     * @param array $params
+     * @param array  $params
      *
      * @return mixed
      * @throws \Exception
@@ -127,7 +121,7 @@ class Client
     protected function _call($method, $params)
     {
         if ($this->namedParameters) {
-            $params = $this->getNamedParameters($method, $params);
+            $params = NamedParameters::getParamsWithNames($this->config->clientClass, $method, $params);
         }
 
         if (!$this->is_batch) {
@@ -157,6 +151,7 @@ class Client
 
     /**
      * Выполняет запрос всех вызовов
+     *
      * @throws JsonRpcClientException
      */
     protected function _execute(): void
@@ -200,6 +195,7 @@ class Client
 
     /**
      * Возвращает содержимое всех запросов
+     *
      * @return array
      */
     protected function getRequestsBody(): array
@@ -266,7 +262,7 @@ class Client
      * Заполняет результат указанными данными
      *
      * @param string $id ID вызова. Если NULL, то будет заполнен результат всех вызовов
-     * @param bool $success Успешен ли вызов
+     * @param bool   $success Успешен ли вызов
      * @param object $data Ответ вызова
      * @param object $error Текст ошибки
      */
@@ -281,42 +277,5 @@ class Client
         } else {
             $this->results[$id] = $data;
         }
-    }
-
-    /**
-     * Подготавливает запрос с именованными параметрами, забирая информацию об именах параметров из описания метода
-     *
-     * @param string $methodName
-     * @param array $params
-     *
-     * @return array
-     * @throws \ReflectionException
-     */
-    protected function getNamedParameters(string $methodName, array $params): array
-    {
-        $reflection = new \ReflectionClass($this);
-        $docs = $reflection->getDocComment();
-
-        $docBlock = $this->docFactory->create($docs);
-        /** @var Method[] $methods */
-        $methods = $docBlock->getTagsByName('method');
-
-        $inputArguments = [];
-
-        foreach ($methods as $method) {
-            if ($method->getMethodName() !== $methodName) {
-                continue;
-            }
-
-            $arguments = $method->getArguments();
-
-            for ($i = 0, $iMax = \count($params); $i < $iMax; $i++) {
-                if (isset($arguments[$i])) {
-                    $inputArguments[$arguments[$i]['name']] = $params[$i];
-                }
-            }
-        }
-
-        return $inputArguments;
     }
 }

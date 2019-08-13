@@ -51,18 +51,18 @@ class ClientClass extends AbstractClass implements Stub
 
 namespace {$this->classNamespace};
 
-use Tochka\JsonRpcClient\Client;
+use Illuminate\Support\Facades\Facade;
 {$this->getUses()}
 /**
  * {$this->classDescription}@author JsonRpcClientGenerator
  * @date {$this->getDate()}
 {$this->methodSource}
  */
-class {$this->className} extends Client
+class {$this->className} extends Facade
 {
-    public function __construct()
+    public static function getFacadeAccessor(): string
     {
-        parent::__construct('{$this->serviceName}', {$this->getNamedParameters()});
+        return self::class;
     }
 }
 php;

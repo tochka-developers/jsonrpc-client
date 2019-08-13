@@ -47,7 +47,7 @@ class ServiceClass extends AbstractClass
         } elseif (!empty($this->method->return)) {
             $return = implode('|', $this->method->return->types);
         }
-
+        $return = $return ?: 'mixed';
         $source[] = "@method static {$return} {$this->method->name}({$parameters})";
         $source[] = '';
 
