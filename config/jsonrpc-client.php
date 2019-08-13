@@ -29,6 +29,7 @@ return [
                     'password' => 'password',
                 ],
             ],
+            'namedParameters' => true,
         ],
     ],
 ];
