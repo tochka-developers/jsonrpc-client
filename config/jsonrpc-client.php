@@ -18,10 +18,10 @@ return [
             // Генерация расширенного описания АПИ в виде классов-хелперов для входных и выходных параметров методов
             'extendedStubs'   => false,
             'middleware'      => [
-                \Tochka\JsonRpcClient\Middleware\AdditionalHeadersMiddleware::class => [
-                    'headerName1' => 'headerValue',
-                    'headerName2' => ['value1', 'value2',], // To include multiple headers with the same name
-                ],
+//                \Tochka\JsonRpcClient\Middleware\AdditionalHeadersMiddleware::class => [
+//                    'headerName1' => 'headerValue',
+//                    'headerName2' => ['value1', 'value2',], // To include multiple headers with the same name
+//                ],
 
                 \Tochka\JsonRpcClient\Middleware\AuthTokenMiddleware::class => [
                     'name'  => 'X-Access-Key',
@@ -33,8 +33,6 @@ return [
                     'username' => 'username',
                     'password' => 'password',
                 ],
-
-
             ],
             'namedParameters' => true,
         ],
