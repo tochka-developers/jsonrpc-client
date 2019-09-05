@@ -12,12 +12,17 @@ return [
         // Наименование соединения
         'api' => [
             // URL-адрес JsonRpc-сервера
-            'url'         => 'https://api.jsonrpc.com/v1/jsonrpc',
+            'url'             => 'https://api.jsonrpc.com/v1/jsonrpc',
             // Имя прокси-класса для данного соединения
-            'clientClass' => '\\App\\Api\\Client',
+            'clientClass'     => '\\App\\Api\\Client',
             // Генерация расширенного описания АПИ в виде классов-хелперов для входных и выходных параметров методов
-            'extendedStubs' => false,
-            'middleware'  => [
+            'extendedStubs'   => false,
+            'middleware'      => [
+                \Tochka\JsonRpcClient\Middleware\AdditionalHeadersMiddleware::class => [
+                    'headerName1' => 'headerValue',
+                    'headerName2' => ['value1', 'value2',], // To include multiple headers with the same name
+                ],
+
                 \Tochka\JsonRpcClient\Middleware\AuthTokenMiddleware::class => [
                     'name'  => 'X-Access-Key',
                     'value' => 'TokenValue',
@@ -28,6 +33,8 @@ return [
                     'username' => 'username',
                     'password' => 'password',
                 ],
+
+
             ],
             'namedParameters' => true,
         ],
