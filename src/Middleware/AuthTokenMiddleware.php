@@ -2,23 +2,25 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use Tochka\JsonRpcClient\Config;
-use Tochka\JsonRpcClient\Contracts\Middleware;
-use Tochka\JsonRpcClient\HttpClient;
+use Tochka\JsonRpcClient\Client\HttpClient;
+use Tochka\JsonRpcClient\Contracts\TransportClient;
+use Tochka\JsonRpcClient\Request;
 
-class AuthTokenMiddleware implements Middleware
+class AuthTokenMiddleware
 {
-    protected $name;
-    protected $value;
+    public function handle(
+        Request $request,
+        \Closure $next,
+        TransportClient $client,
+        $value,
+        $name = 'X-Access-Key'
+    ) {
+        if (!$client instanceof HttpClient) {
+            return $next($request);
+        }
 
-    public function __construct($options)
-    {
-        $this->name = $options['name'] ?? 'X-Access-Key';
-        $this->value = $options['value'] ?? '';
-    }
+        $client->setHeader($name, $value);
 
-    public function handle(HttpClient $client, Config $config): void
-    {
-        $client->setHeader($this->name, $this->value);
+        return $next($request);
     }
 }

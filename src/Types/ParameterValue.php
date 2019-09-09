@@ -1,6 +1,6 @@
 <?php
 
-namespace Tochka\JsonRpcClient\Client;
+namespace Tochka\JsonRpcClient\Types;
 
 interface ParameterValue
 {

@@ -2,7 +2,7 @@
 
 namespace Tochka\JsonRpcClient\ClientGenerator;
 
-use Tochka\JsonRpcClient\Config;
+use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcSmd\SmdDescription;
 
 /**
@@ -19,7 +19,7 @@ class ClientClass extends AbstractClass implements Stub
     protected $serviceName;
     protected $methodSource;
 
-    public function __construct(SmdDescription $smd, Config $config, string $className, string $classNamespace)
+    public function __construct(SmdDescription $smd, ClientConfig $config, string $className, string $classNamespace)
     {
         parent::__construct(null, $className, $classNamespace);
         $this->extendedStubs = $config->extendedStubs;
@@ -56,6 +56,11 @@ use Illuminate\Support\Facades\Facade;
 /**
  * {$this->classDescription}@author JsonRpcClientGenerator
  * @date {$this->getDate()}
+ * @method static static batch()
+ * @method static static cache(\$minutes = -1)
+ * @method static static with(array \$values)
+ * @method static execute()
+ * @method static mixed call(string \$method, array \$params)
 {$this->methodSource}
  */
 class {$this->className} extends Facade

@@ -1,27 +1,30 @@
 <?php
 
-namespace Tochka\JsonRpcClient;
+namespace Tochka\JsonRpcClient\QueryPreparers;
 
 use phpDocumentor\Reflection\DocBlockFactory;
+use Tochka\JsonRpcClient\ClientConfig;
+use Tochka\JsonRpcClient\Contracts\QueryPreparer;
 use Tochka\JsonRpcClient\DocBlock\Method;
+use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 
-class NamedParameters
+class DefaultQueryPreparer implements QueryPreparer
 {
     /**
-     * Задаёт имена параметрам, забирая информацию из описания метода
+     * @param ClientConfig $config
+     * @param string       $methodName
+     * @param array        $params
      *
-     * @param string $class
-     * @param string $methodName
-     * @param array  $params
-     *
-     * @return array
+     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest
      * @throws \ReflectionException
      */
-    public static function getParamsWithNames(string $class, string $methodName, array $params): array
+    public function prepare(string $methodName, array $params, ClientConfig $config): JsonRpcRequest
     {
+        $clientFacade = $config->clientClass;
+
         $docFactory = DocBlockFactory::createInstance(['method' => Method::class]);
 
-        $reflection = new \ReflectionClass($class);
+        $reflection = new \ReflectionClass($clientFacade);
         $docs = $reflection->getDocComment();
 
         $docBlock = $docFactory->create($docs);
@@ -44,6 +47,8 @@ class NamedParameters
             }
         }
 
-        return $inputArguments;
+        $id = uniqid($config->serviceName, true);
+
+        return new JsonRpcRequest($methodName, $inputArguments, $id);
     }
 }

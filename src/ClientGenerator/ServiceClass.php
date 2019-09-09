@@ -48,7 +48,7 @@ class ServiceClass extends AbstractClass
             $return = implode('|', $this->method->return->types);
         }
         $return = $return ?: 'mixed';
-        $source[] = "@method static {$return} {$this->method->name}({$parameters})";
+        $source[] = "@method static Response|{$return} {$this->method->name}({$parameters})";
         $source[] = '';
 
         return $source;

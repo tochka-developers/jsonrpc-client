@@ -1,19 +1,22 @@
 <?php
 
-namespace Tochka\JsonRpcClient;
+namespace Tochka\JsonRpcClient\Client;
 
+use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use Tochka\JsonRpcClient\ClientConfig;
+use Tochka\JsonRpcClient\Contracts\TransportClient;
+use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Tochka\JsonRpcClient\Standard\JsonRpcResponse;
 
-class HttpClient
+class HttpClient implements TransportClient
 {
     protected $client;
-    protected $uri;
     protected $options;
 
-    public function __construct($uri)
+    public function __construct()
     {
-        $this->client = new \GuzzleHttp\Client();
-        $this->uri = $uri;
+        $this->client = new Client();
     }
 
     /**
@@ -21,6 +24,8 @@ class HttpClient
      *
      * @param $name
      * @param $value
+     *
+     * @codeCoverageIgnore
      */
     public function setOption($name, $value): void
     {
@@ -29,7 +34,9 @@ class HttpClient
 
     /**
      * Возвращает все параметры клиента
+     *
      * @return array
+     * @codeCoverageIgnore
      */
     public function getOptions(): array
     {
@@ -42,6 +49,7 @@ class HttpClient
      * @param $name
      *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getOption($name)
     {
@@ -53,6 +61,8 @@ class HttpClient
      *
      * @param $name
      * @param $value
+     *
+     * @codeCoverageIgnore
      */
     public function setHeader($name, $value): void
     {
@@ -65,6 +75,7 @@ class HttpClient
      * @param $name
      *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getHeader($name)
     {
@@ -73,7 +84,9 @@ class HttpClient
 
     /**
      * Возвращает все установленные заголовки
+     *
      * @return array
+     * @codeCoverageIgnore
      */
     public function getHeaders(): array
     {
@@ -84,6 +97,8 @@ class HttpClient
      * Устанавливает содержимое запроса
      *
      * @param array $body
+     *
+     * @codeCoverageIgnore
      */
     public function setBody(array $body): void
     {
@@ -92,7 +107,9 @@ class HttpClient
 
     /**
      * Возвращает содержимое запроса
+     *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getBody()
     {
@@ -101,10 +118,33 @@ class HttpClient
 
     /**
      * Выполняет запрос
-     * @return string
+     *
+     * @param JsonRpcRequest[] $requests
+     * @param ClientConfig     $config
+     *
+     * @return \Tochka\JsonRpcClient\Standard\JsonRpcResponse[]
      */
-    public function get(): string
+    public function get(array $requests, ClientConfig $config): array
     {
-        return $this->client->post($this->uri, $this->options)->getBody();
+        $requests = array_map(static function (JsonRpcRequest $request) {
+            return $request->toArray();
+        }, $requests);
+
+        $body = \count($requests) === 1 ? $requests[0] : $requests;
+        $this->setBody($body);
+
+        $rawResponse = $this->client->post($config->url, $this->options)->getBody();
+        $responses = \GuzzleHttp\json_decode($rawResponse, false);
+        if (!\is_array($responses)) {
+            $responses = [$responses];
+        }
+
+        $result = [];
+
+        foreach ($responses as $response) {
+            $result[] = new JsonRpcResponse($response);
+        }
+
+        return $result;
     }
 }

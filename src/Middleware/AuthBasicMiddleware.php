@@ -3,29 +3,30 @@
 namespace Tochka\JsonRpcClient\Middleware;
 
 use GuzzleHttp\RequestOptions;
-use Tochka\JsonRpcClient\Config;
-use Tochka\JsonRpcClient\Contracts\Middleware;
-use Tochka\JsonRpcClient\HttpClient;
+use Tochka\JsonRpcClient\Client\HttpClient;
+use Tochka\JsonRpcClient\Contracts\TransportClient;
+use Tochka\JsonRpcClient\Request;
 
-class AuthBasicMiddleware implements Middleware
+class AuthBasicMiddleware
 {
-    protected $scheme;
-    protected $username;
-    protected $password;
+    public function handle(
+        Request $request,
+        \Closure $next,
+        TransportClient $client,
+        $username = '',
+        $password = '',
+        $scheme = 'basic'
+    ) {
+        if (!$client instanceof HttpClient) {
+            return $next($request);
+        }
 
-    public function __construct($options)
-    {
-        $this->scheme = $options['scheme'] ?? 'basic';
-        $this->username = $options['username'] ?? '';
-        $this->password = $options['password'] ?? '';
-    }
-
-    public function handle(HttpClient $client, Config $config): void
-    {
         $client->setOption(RequestOptions::AUTH, [
-            $this->username,
-            $this->password,
-            $this->scheme,
+            $username,
+            $password,
+            $scheme,
         ]);
+
+        return $next($request);
     }
 }

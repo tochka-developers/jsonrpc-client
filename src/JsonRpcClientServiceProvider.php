@@ -3,6 +3,7 @@
 namespace Tochka\JsonRpcClient;
 
 use Illuminate\Support\ServiceProvider;
+use Tochka\JsonRpcClient\Client\HttpClient;
 use Tochka\JsonRpcClient\Console\GenerateClient;
 
 class JsonRpcClientServiceProvider extends ServiceProvider
@@ -23,10 +24,17 @@ class JsonRpcClientServiceProvider extends ServiceProvider
     public function register()
     {
         $services = config('jsonrpc-client.connections', []);
+        $clientName = config('jsonrpc-client.clientName', []);
+
         foreach ($services as $alias => $serviceConfig) {
-            if (class_exists($serviceConfig['clientClass'])) {
-                $this->app->singleton($serviceConfig['clientClass'], function () use ($alias, $serviceConfig) {
-                    return new \Tochka\JsonRpcClient\Client($alias, $serviceConfig['namedParameters'] ?? true);
+            $config = new ClientConfig($clientName, $alias, $serviceConfig);
+
+            if (class_exists($config->clientClass)) {
+                $this->app->singleton($config->clientClass, function () use ($config) {
+                    $client = new HttpClient();
+                    $queryPreparer = $this->app->get($config->queryPreparer);
+
+                    return new Client($config, $queryPreparer, $client);
                 });
             }
         }

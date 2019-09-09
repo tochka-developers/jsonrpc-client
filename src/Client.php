@@ -2,50 +2,49 @@
 
 namespace Tochka\JsonRpcClient;
 
-use Tochka\JsonRpcClient\Contracts\Middleware;
+use Illuminate\Container\Container;
+use Tochka\JsonRpcClient\Contracts\QueryPreparer;
+use Tochka\JsonRpcClient\Contracts\TransportClient;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\Exceptions\ResponseException;
+use Tochka\JsonRpcClient\Middleware\MiddlewarePipeline;
 
 /**
  * Class Client
  *
  * @package Tochka\JsonRpcClient
- * @method static static get(string $serviceName)
  * @method static static batch()
  * @method static static cache($minutes = -1)
+ * @method static static with(array $values)
  * @method static execute()
- * @method static EmptyResponse call(string $method, array $params)
+ * @method static mixed call(string $method, array $params)
  */
 class Client
 {
-    protected $serviceName;
-    protected $namedParameters = true;
+    /** @var \Tochka\JsonRpcClient\ClientConfig */
     protected $config;
+    /** @var bool */
+    protected $executeImmediately = true;
 
-    protected $is_batch = false;
-
-    protected $cache;
-
-    /** @var JsonRpcRequest[] */
+    /** @var \Tochka\JsonRpcClient\Request[] */
     protected $requests = [];
-
     /** @var array */
     protected $results = [];
 
-    public function __construct($serviceName = null, $namedParameters = true)
-    {
-        $this->requests = [];
-        $this->results = [];
-        $this->serviceName = $serviceName;
-        $this->namedParameters = $namedParameters;
-        $this->config = Config::create($this->serviceName);
-    }
+    /** @var array */
+    protected $additionalValues = [];
+    /** @var QueryPreparer */
+    protected $queryPreparer;
+    /** @var \Tochka\JsonRpcClient\Contracts\TransportClient */
+    protected $transportClient;
 
-    public static function __callStatic($method, $params)
+    public function __construct(ClientConfig $config, QueryPreparer $queryPreparer, TransportClient $client)
     {
-        $instance = new static();
+        $this->reset();
 
-        return $instance->$method(...$params);
+        $this->config = $config;
+        $this->queryPreparer = $queryPreparer;
+        $this->transportClient = $client;
     }
 
     /**
@@ -64,22 +63,6 @@ class Client
         return $this->_call($method, $params);
     }
 
-    /** @noinspection MagicMethodsValidityInspection */
-    /**
-     * Устанавливает имя сервиса для текущего экземпляра клиента
-     *
-     * @param string $serviceName
-     *
-     * @return $this
-     */
-    protected function _get($serviceName): self
-    {
-        $this->serviceName = $serviceName;
-        $this->config = Config::create($serviceName);
-
-        return $this;
-    }
-
     /**
      * Помечает экземпляр клиента как массив вызовов
      *
@@ -87,9 +70,20 @@ class Client
      */
     protected function _batch(): self
     {
-        $this->requests = [];
-        $this->results = [];
-        $this->is_batch = true;
+        $this->reset();
+        $this->executeImmediately = false;
+
+        return $this;
+    }
+
+    /**
+     * @param array $values
+     *
+     * @return \Tochka\JsonRpcClient\Client
+     */
+    protected function _with(array $values): self
+    {
+        $this->additionalValues = $values;
 
         return $this;
     }
@@ -103,7 +97,7 @@ class Client
      */
     protected function _cache($minutes = -1): self
     {
-        $this->cache = $minutes;
+        $this->additionalValues['cache'] = $minutes;
 
         return $this;
     }
@@ -120,30 +114,20 @@ class Client
      */
     protected function _call($method, $params)
     {
-        if ($this->namedParameters) {
-            $params = NamedParameters::getParamsWithNames($this->config->clientClass, $method, $params);
-        }
+        $jsonRpcRequest = $this->queryPreparer->prepare($method, $params, $this->config);
+        $request = new Request($jsonRpcRequest);
+        $request->setAdditional($this->additionalValues);
 
-        if (!$this->is_batch) {
-            $this->requests = [];
-            $this->results = [];
-        }
-
-        $request = new JsonRpcRequest(
-            $this->config->serviceName,
-            $method,
-            $params,
-            $this->config->clientName,
-            $this->cache
-        );
+        $this->additionalValues = [];
 
         $this->requests[$request->getId()] = $request;
-        $this->results[$request->getId()] = new EmptyResponse();
+        $this->results[$request->getId()] = $this->requests[$request->getId()]->getResult();
 
-        $this->cache = null;
-
-        if (!$this->is_batch) {
-            $this->_execute();
+        if ($this->executeImmediately) {
+            $result = $this->_execute();
+            if (\count($result) > 0) {
+                return $result[0];
+            }
         }
 
         return $this->results[$request->getId()];
@@ -152,130 +136,70 @@ class Client
     /**
      * Выполняет запрос всех вызовов
      *
-     * @throws JsonRpcClientException
+     * @return array
+     * @throws \Tochka\JsonRpcClient\Exceptions\ResponseException
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
-    protected function _execute(): void
+    protected function _execute(): array
     {
-        $client = new HttpClient($this->config->url);
-
-        $requests = $this->getRequestsBody();
+        $requests = $this->handleMiddleware();
 
         if (!\count($requests)) {
-            return;
-        }
-        if (\count($requests) === 1) {
-            $requests = $requests[0];
+            return [];
         }
 
-        $client->setBody($requests);
+        $responses = $this->transportClient->get($requests, $this->config);
 
-        foreach ($this->config->middleware as $middleware => $options) {
-            $this->handleMiddleware($client, $middleware, $options);
-        }
+        foreach ($responses as $response) {
+            if (isset($this->requests[$response->id])) {
+                $this->requests[$response->id]->setJsonRpcResponse($response);
+                $this->results[$response->id] = $this->requests[$response->id]->getResult();
+            } else {
+                if (!empty($response->error)) {
+                    throw new ResponseException($response->error);
+                }
 
-        $json_response = $client->get();
-        $response = json_decode($json_response);
-
-        // ошибка декодирования Json
-        if (null === $response) {
-            throw new JsonRpcClientException(JsonRpcClientException::CODE_RESPONSE_PARSE_ERROR);
-        }
-
-        if (\is_array($response)) {
-            // если вернулся массив результатов
-            foreach ($response as $result) {
-                $this->parseResult($result);
+                throw new JsonRpcClientException(0, 'Unknown response');
             }
-        } else {
-            $this->parseResult($response);
         }
 
-        $this->requests = [];
+        return array_values(array_map(static function (Result $item) {
+            return $item->get();
+        }, $this->results));
     }
 
     /**
-     * Возвращает содержимое всех запросов
-     *
-     * @return array
+     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest[]
      */
-    protected function getRequestsBody(): array
+    protected function handleMiddleware(): array
     {
-        $requests = [];
+        $pipeline = new MiddlewarePipeline(Container::getInstance());
+        $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
 
+        $requests = [];
         foreach ($this->requests as $request) {
-            if ($request->hasCache()) {
-                $result = $request->getCache();
-                $this->result($request->getId(), $result->success, $result->data, $result->error);
-            } else {
-                $requests[] = $request->getRequest();
+            $request = $pipeline->send($request)
+                ->through($this->config->middleware)
+                ->via('handle')
+                ->then(static function (Request $request) {
+                    return ($request->getResult() instanceof Result)
+                        ? $request->getJsonRpcRequest()
+                        : null;
+                });
+
+            if ($request) {
+                $requests[] = $request;
             }
         }
 
         return $requests;
     }
 
-    /**
-     * Вызывает обработчики
-     *
-     * @param $client
-     * @param $middleware
-     * @param $options
-     */
-    protected function handleMiddleware($client, $middleware, $options): void
+    protected function reset(): void
     {
-        if (\is_array($options)) {
-            $instance = new $middleware($options);
-        } else {
-            $instance = new $options();
-        }
-
-        if (!$instance instanceof Middleware) {
-            throw new \LogicException(\get_class($instance) . ' must be instance of Tochka\JsonRpcClient\Contracts\Middleware interface');
-        }
-
-        $instance->handle($client, $this->config);
-    }
-
-    /**
-     * @param $result
-     *
-     * @return bool
-     * @throws ResponseException
-     */
-    protected function parseResult($result): bool
-    {
-        if (!empty($result->error)) {
-            throw new ResponseException($result->error);
-        }
-
-        $this->result(!empty($result->id) ? $result->id : null, true, $result->result);
-
-        // если надо - кешируем результат
-        if (!empty($result->id) && $this->requests[$result->id]->wantCache()) {
-            $this->requests[$result->id]->setCache($this->results[$result->id]);
-        }
-
-        return true;
-    }
-
-    /**
-     * Заполняет результат указанными данными
-     *
-     * @param string $id ID вызова. Если NULL, то будет заполнен результат всех вызовов
-     * @param bool   $success Успешен ли вызов
-     * @param object $data Ответ вызова
-     * @param object $error Текст ошибки
-     */
-    protected function result($id, $success, $data = null, $error = null): void
-    {
-        if (null === $id) {
-            foreach ($this->results as $key => $value) {
-                if (null !== $key) {
-                    $this->result($key, $success, $data, $error);
-                }
-            }
-        } else {
-            $this->results[$id] = $data;
-        }
+        $this->executeImmediately = true;
+        $this->requests = [];
+        $this->additionalValues = [];
+        $this->results = [];
     }
 }

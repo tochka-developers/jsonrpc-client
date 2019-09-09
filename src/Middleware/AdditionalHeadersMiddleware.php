@@ -2,28 +2,24 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use Tochka\JsonRpcClient\Config;
-use Tochka\JsonRpcClient\Contracts\Middleware;
-use Tochka\JsonRpcClient\HttpClient;
+use Tochka\JsonRpcClient\Client\HttpClient;
+use Tochka\JsonRpcClient\Contracts\TransportClient;
+use Tochka\JsonRpcClient\Request;
 
 /**
  * A middleware allowing for inclusion of additional http headers into the request.
  *
  * @package App\Api\Middleware
  */
-class AdditionalHeadersMiddleware implements Middleware
+class AdditionalHeadersMiddleware
 {
-    protected $name;
-    protected $values;
-
-    public function __construct($options)
+    public function handle(Request $request, \Closure $next, TransportClient $client, ...$headers)
     {
-        $this->values = $options;
-    }
+        if (!$client instanceof HttpClient) {
+            return $next($request);
+        }
 
-    public function handle(HttpClient $client, Config $config): void
-    {
-        foreach ($this->values as $key => $value) {
+        foreach ($headers as $key => $value) {
             if (!\is_array($value)) {
                 $value = [$value];
             }
@@ -32,5 +28,7 @@ class AdditionalHeadersMiddleware implements Middleware
                 $client->setHeader($key, $element);
             }
         }
+
+        return $next($request);
     }
 }

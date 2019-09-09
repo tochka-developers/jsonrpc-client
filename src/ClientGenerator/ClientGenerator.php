@@ -2,8 +2,9 @@
 
 namespace Tochka\JsonRpcClient\ClientGenerator;
 
+use GuzzleHttp\Client;
 use RuntimeException;
-use Tochka\JsonRpcClient\Config;
+use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\HttpClient;
 use Tochka\JsonRpcSmd\SmdDescription;
@@ -17,7 +18,7 @@ class ClientGenerator
     /** @var SmdDescription */
     public $smd;
 
-    public function __construct(Config $config)
+    public function __construct(ClientConfig $config)
     {
         $this->config = $config;
     }
@@ -27,7 +28,9 @@ class ClientGenerator
      */
     public function generate(): void
     {
-        $client = new HttpClient($this->getUri());
+        $client = new Client([
+            'url' => $this->getUri(),
+        ]);
         $result = $client->get();
 
         $smd = json_decode($result, true);
