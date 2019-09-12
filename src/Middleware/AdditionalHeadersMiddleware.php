@@ -13,7 +13,7 @@ use Tochka\JsonRpcClient\Request;
  */
 class AdditionalHeadersMiddleware
 {
-    public function handle(Request $request, \Closure $next, TransportClient $client, ...$headers)
+    public function handle(Request $request, \Closure $next, TransportClient $client, $headers = [])
     {
         if (!$client instanceof HttpClient) {
             return $next($request);

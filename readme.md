@@ -50,6 +50,8 @@ $app->register(Tochka\JsonRpcClient\JsonRpcClientServiceProvider::class);
 токена
 * `AuthBasicMiddleware` - класс Basic-авторизации. Параметры: `scheme` - тип авторизации (`basic`, `digest`, `ntlm`), 
 `username` и `password` - данные для авторизации
+* `AdditionalHeadersMiddleware` - класс для добавления кастомных заголовков. Параметры: `headers` - ассоциативный массив 
+с заголовками, где ключ - имя заголовка, а значение - значение заголовка.
 
 ### Вызовы без прокси-класса
 Вызов метода JsonRpc:
@@ -100,7 +102,7 @@ $api->execute();
 Учтите, что кешироваться будет только тот метод, перед которым был вызван `cache`. 
 
 ### Генерация прокси-класса
-Прокси-класс - это наследник JsonRpcClient, который содержит информацию обо всех доступных методах
+Прокси-класс - это фасад JsonRpcClient, который содержит информацию обо всех доступных методах
 JsonRpc-сервера, а также сам делает маппинг параметров, переданных в метод, в виде ассоциативного массива.
 Если сервер умеет возвращать SMD-схему, то такой класс может быть сгенерирован автоматически.
 
@@ -123,32 +125,57 @@ php artisan jsonrpc:generateClient connection
 ```
 php artisan jsonrpc:generateClient
 ```
-### Вызовы через прокси-класс
-Прокси-класс уже содержит информацию об используемом соединении, поэтому метод `get` вызывать не нужно.
-Кроме того, прокси-класс сам реализует маппинг параметров, передаваемых в метод, в ассоциативный массив для
-передачи  на JsonRpc-сервер. Реализация маппинга происходит только если JsonRpc-сервер использует ассоциативные 
-параметры.
-
-Примеры вызовов:
+### Вызовы методов
+Вызов метода JsonRpc:
 ```php
-// Single call
+//....
 $result = Api::fooBar('Some text');
+```
 
-// Multiple call
+Клиент поддерживает вызов нескольких удаленных методов через один запрос:
+```php
+$api = Api::batch();
+$api->foo('params');
+$api->bar(123);
+$api->someMethod(1, true);
+[$resultFoo, $resultBar, $resultSome] = $api->execute();
+```
+
+
+Клиент поддерживает кеширование результатов с помощью метода `cache`:
+```php
+$result = Api::cache(10)->fooBar('Some text');
+```
+При таком вызове результаты будут закешированы на 10 минут, и последующих вызовах этого метода с такими же параметрами - 
+запрос на сервер не будет посылаться, результат будет сразу получаться из кеша. Естественно, результаты кешируются 
+только для успешных вызовов. 
+
+Также кеширование поддерживается и для нескольких вызовов:
+```php
 $api = Api::batch();
 $resultFoo = $api->cache(10)->foo('params');
 $resultBar = $api->bar(123);
 $resultSome = $api->cache(60)->someMethod(1, true);
-$api->execute();
+[$resultFoo, $resultBar, $resultSome] = $api->execute();
 ```
+Учтите, что кешироваться будет только тот метод, перед которым был вызван `cache`. 
 
 ### Middleware
 Классы-middleware позволяет внести изменения в исходящие запросы, например добавить дополнительные заголовки, включить 
 авторизацию, либо внести изменения в само тело запроса. 
 
 Вы можете использовать свои классы, указав их имена в конфигурации необходимого подключения.
-Класс-middleware должен реализовывать интерфейс `Tochka\JsonRpcClient\Contracts\Middleware`.
-В конструктор middleware при создании передаются параметры, указанные в конфигурации. Пример:
+В классе middleware должне быть реализован один метод - `handle`. Первые два параметра обязательные: 
+```php
+public function handle(\Tochka\JsonRpcClient\Request $request, \Closure $next): void
+    {
+        return $next($request);
+    }
+```
+Чтобы продолжить выполнение цепочки middleware, в методе необходимо обязательно вызвать метод $next, передав туда 
+актуальную версию $request.
+Кроме того, вы можете в параметрах метода `handle` использовать:
+* дополнительные параметры, передаваемые в конфигурации:
 ```php
 // config
 'middleware'  => [
@@ -158,25 +185,22 @@ $api->execute();
     ],
 ]
 
-// class
-use Tochka\JsonRpcClient\Config;
-use Tochka\JsonRpcClient\Contracts\Middleware;
-use Tochka\JsonRpcClient\HttpClient;
+// middleware
+use Tochka\JsonRpcClient\Request;
 
-class AuthTokenMiddleware implements Middleware
+class AuthTokenMiddleware
 {
-    protected $name;
-    protected $value;
-
-    public function __construct($options)
+    public function handle(Request $request, \Closure $next, $value, $name = 'X-Access-Key') 
     {
-        $this->name = $options['name'] ?? 'X-Access-Key';
-        $this->value = $options['value'] ?? '';
-    }
+        // ...
 
-    public function handle(HttpClient $client, Config $config): void
-    {
-        $client->setHeader($this->name, $this->value);
+        return $next($request);
     }
 }
 ```
+Порядок указание параемтров не важен, указанные в конфигурации значения будут переданы в middleware по имени параметра.
+* контекстные классы `Tochka\JsonRpcClient\Contracts\TransportClient` и `Tochka\JsonRpcClient\ClientConfig`. 
+Если у параметра указать один из указанных типов, то в метод при вызове будут переданы текущие экземпляры классов,
+отвечающих за формирование транспортного запроса (например, сконфигурированный экземпляр класса 
+`Tochka\JsonRpcClient\Client\HttpClient`) либо класс с конфигурацией текущего соединения.
+* любой другой класс/контракт/фасад, зарегистрированный в DI Laravel
