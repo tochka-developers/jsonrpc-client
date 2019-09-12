@@ -33,6 +33,12 @@ class ClientConfig
         $this->queryPreparer = $clientConfig['queryPreparer'] ?? DefaultQueryPreparer::class;
     }
 
+    /**
+     * @param $middleware
+     *
+     * @return array
+     * @codeCoverageIgnore
+     */
     protected function parseMiddleware($middleware): array
     {
         $result = [];

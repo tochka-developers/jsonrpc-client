@@ -14,6 +14,8 @@ class MiddlewarePipeline extends Pipeline
     /**
      * @param \Tochka\JsonRpcClient\ClientConfig              $config
      * @param \Tochka\JsonRpcClient\Contracts\TransportClient $client
+     *
+     * @codeCoverageIgnore
      */
     public function setAdditionalDIInstances(ClientConfig $config, TransportClient $client): void
     {
