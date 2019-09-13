@@ -114,12 +114,43 @@ $resultSome = $api->cache(60)->someMethod(1, true);
 авторизацию, либо внести изменения в само тело запроса. 
 
 Вы можете использовать свои классы, указав их имена в конфигурации необходимого подключения.
-В классе middleware должне быть реализован один метод - `handle`. Первые два параметра обязательные: 
+Есть два типа middleware. Первый рассчитан на взаимодействие с каждым конкретным JsonRpc-запросом, даже если они 
+запущены в batch-режиме. Второй тип запускается один раз на весь транспортный запрос.
+
+Первый тип middleware запускается для каждого вызова метода в рамках одного запроса на сервер. То есть, если был сделан 
+batch-запрос с вызовами 3х методов - каждая такая middleware будет запущена по одному разу для каждого вызванного метода.
+
+Второй тип middleware будет запущен только один раз для всего запроса, и в него будет передан весь стек вызовов.
+Второй тип подходит для middleware, занимающихся добавлением кас томных заголовков, авторизации и прочих модификаций
+транспортного запроса.
+
+В классе middleware должне быть реализован один метод - `handle`. 
+Первые два параметра обязательные.
+Пример middleware для обработки каждого вызова в запросе (первый тип):
 ```php
-public function handle(\Tochka\JsonRpcClient\Request $request, \Closure $next): void
+class SomeMiddleware
+{
+    public function handle(\Tochka\JsonRpcClient\Request $request, \Closure $next): void
     {
+        // ...
         return $next($request);
     }
+}
+```
+Пример middleware для обработки всего запроса целиком:
+```php
+class SomeMiddleware implements \Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware
+{
+    /**
+     * @param \Tochka\JsonRpcClient\Standard\JsonRpcRequest[] $requests
+     * @param \Closure         $next
+     */
+    public function handle(array $requests, \Closure $next): void
+    {
+        // ...
+        return $next($requests);
+    }
+}
 ```
 Чтобы продолжить выполнение цепочки middleware, в методе необходимо обязательно вызвать метод $next, передав туда 
 актуальную версию $request.
@@ -137,9 +168,9 @@ public function handle(\Tochka\JsonRpcClient\Request $request, \Closure $next): 
 // middleware
 use Tochka\JsonRpcClient\Request;
 
-class AuthTokenMiddleware
+class AuthTokenMiddleware implements \Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware
 {
-    public function handle(Request $request, \Closure $next, $value, $name = 'X-Access-Key') 
+    public function handle(array $request, \Closure $next, $value, $name = 'X-Access-Key') 
     {
         // ...
 
@@ -147,7 +178,7 @@ class AuthTokenMiddleware
     }
 }
 ```
-Порядок указание параемтров не важен, указанные в конфигурации значения будут переданы в middleware по имени параметра.
+Порядок указание параметров не важен, указанные в конфигурации значения будут переданы в middleware по имени параметра.
 * контекстные классы `Tochka\JsonRpcClient\Contracts\TransportClient` и `Tochka\JsonRpcClient\ClientConfig`. 
 Если у параметра указать один из указанных типов, то в метод при вызове будут переданы текущие экземпляры классов,
 отвечающих за формирование транспортного запроса (например, сконфигурированный экземпляр класса 

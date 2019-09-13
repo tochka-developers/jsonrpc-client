@@ -56,11 +56,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * {$this->classDescription}@author JsonRpcClientGenerator
  * @date {$this->getDate()}
- * @method static static batch()
- * @method static static cache(\$minutes = -1)
- * @method static static with(array \$values)
- * @method static execute()
- * @method static mixed call(string \$method, array \$params)
+ * @mixin \Tochka\JsonRpcClient\Client
 {$this->methodSource}
  */
 class {$this->className} extends Facade

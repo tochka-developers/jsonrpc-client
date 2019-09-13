@@ -47,7 +47,7 @@ class DefaultQueryPreparer implements QueryPreparer
             }
         }
 
-        $id = uniqid($config->serviceName, true);
+        $id = uniqid($config->clientName, true);
 
         return new JsonRpcRequest($methodName, $inputArguments, $id);
     }

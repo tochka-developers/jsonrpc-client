@@ -32,6 +32,11 @@
       "Tochka\\JsonRpcClient\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tochka\\JsonRpcClient\\Tests\\": "tests/"
+    }
+  },
   "extra": {
     "laravel": {
       "providers": [

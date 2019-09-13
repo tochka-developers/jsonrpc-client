@@ -4,13 +4,24 @@ namespace Tochka\JsonRpcClient\Middleware;
 
 use GuzzleHttp\RequestOptions;
 use Tochka\JsonRpcClient\Client\HttpClient;
+use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
 use Tochka\JsonRpcClient\Contracts\TransportClient;
-use Tochka\JsonRpcClient\Request;
+use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 
-class AuthBasicMiddleware
+class AuthBasicMiddleware implements OnceExecutedMiddleware
 {
+    /**
+     * @param JsonRpcRequest[] $requests
+     * @param \Closure         $next
+     * @param TransportClient  $client
+     * @param string           $username
+     * @param string           $password
+     * @param string           $scheme
+     *
+     * @return mixed
+     */
     public function handle(
-        Request $request,
+        array $requests,
         \Closure $next,
         TransportClient $client,
         $username = '',
@@ -18,7 +29,7 @@ class AuthBasicMiddleware
         $scheme = 'basic'
     ) {
         if (!$client instanceof HttpClient) {
-            return $next($request);
+            return $next($requests);
         }
 
         $client->setOption(RequestOptions::AUTH, [
@@ -27,6 +38,6 @@ class AuthBasicMiddleware
             $scheme,
         ]);
 
-        return $next($request);
+        return $next($requests);
     }
 }

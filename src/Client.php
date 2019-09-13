@@ -15,7 +15,8 @@ use Tochka\JsonRpcClient\Middleware\MiddlewarePipeline;
  * @package Tochka\JsonRpcClient
  * @method static static batch()
  * @method static static cache($minutes = -1)
- * @method static static with(array $values)
+ * @method static static with(string $name, $value)
+ * @method static static withValues(array $values)
  * @method static execute()
  * @method static mixed call(string $method, array $params)
  */
@@ -77,13 +78,26 @@ class Client
     }
 
     /**
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return \Tochka\JsonRpcClient\Client
+     */
+    protected function _with(string $name, $value): self
+    {
+        $this->additionalValues[$name] = $value;
+
+        return $this;
+    }
+
+    /**
      * @param array $values
      *
      * @return \Tochka\JsonRpcClient\Client
      */
-    protected function _with(array $values): self
+    protected function _withValues(array $values): self
     {
-        $this->additionalValues = $values;
+        $this->additionalValues = array_merge($this->additionalValues, $values);
 
         return $this;
     }
@@ -191,6 +205,13 @@ class Client
                 $requests[] = $request;
             }
         }
+
+        $requests = $pipeline->send($requests)
+            ->through($this->config->onceExecutedMiddleware)
+            ->via('handle')
+            ->then(static function (array $requests) {
+                return $requests;
+            });
 
         return $requests;
     }

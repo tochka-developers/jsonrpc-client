@@ -2,6 +2,7 @@
 
 namespace Tochka\JsonRpcClient;
 
+use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
 use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
 
 class ClientConfig
@@ -12,7 +13,8 @@ class ClientConfig
     public $url;
     public $clientClass;
     public $extendedStubs = false;
-    public $middleware;
+    public $middleware = [];
+    public $onceExecutedMiddleware = [];
     public $queryPreparer;
 
     public function __construct(string $clientName, string $serviceName, array $clientConfig)
@@ -27,7 +29,8 @@ class ClientConfig
         $this->url = $clientConfig['url'];
         $this->clientClass = $clientConfig['clientClass'];
 
-        $this->middleware = $this->parseMiddleware($clientConfig['middleware'] ?? []);
+        $middleware = $this->parseMiddlewareConfiguration($clientConfig['middleware'] ?? []);
+        $this->sortMiddleware($middleware);
 
         $this->extendedStubs = $clientConfig['extendedStubs'] ?? false;
         $this->queryPreparer = $clientConfig['queryPreparer'] ?? DefaultQueryPreparer::class;
@@ -39,7 +42,7 @@ class ClientConfig
      * @return array
      * @codeCoverageIgnore
      */
-    protected function parseMiddleware($middleware): array
+    protected function parseMiddlewareConfiguration($middleware): array
     {
         $result = [];
         foreach ($middleware as $name => $m) {
@@ -51,5 +54,20 @@ class ClientConfig
         }
 
         return $result;
+    }
+
+    /**
+     * @param array $middleware
+     */
+    protected function sortMiddleware(array $middleware): void
+    {
+        foreach ($middleware as $m) {
+            $implements = class_implements($m[0]);
+            if ($implements && \in_array(OnceExecutedMiddleware::class, $implements, true)) {
+                $this->onceExecutedMiddleware[] = $m;
+            } else {
+                $this->middleware[] = $m;
+            }
+        }
     }
 }

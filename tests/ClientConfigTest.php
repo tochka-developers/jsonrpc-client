@@ -5,6 +5,10 @@ namespace Tochka\JsonRpcClient\Tests;
 use PHPUnit\Framework\TestCase;
 use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
+use Tochka\JsonRpcClient\Tests\Helpers\BarMiddleware;
+use Tochka\JsonRpcClient\Tests\Helpers\BarOnceMiddleware;
+use Tochka\JsonRpcClient\Tests\Helpers\FooMiddleware;
+use Tochka\JsonRpcClient\Tests\Helpers\FooOnceMiddleware;
 
 class ClientConfigTest extends TestCase
 {
@@ -26,25 +30,41 @@ class ClientConfigTest extends TestCase
             'url'           => 'http://test.com/jsonrpc',
             'clientClass'   => 'MyStubClass',
             'middleware'    => [
-                'MyMiddleware1',
-                'MyMiddleware2' => [
+                FooMiddleware::class,
+                FooOnceMiddleware::class => [
                     'foo'   => 'bar',
                     'hello' => 'world',
                 ],
+                BarMiddleware::class     => [
+                    'foo'   => 'bar',
+                    'hello' => 'world',
+                ],
+                BarOnceMiddleware::class,
             ],
             'queryPreparer' => 'TestQueryPreparer',
             'extendedStubs' => true,
         ];
 
         $middlewareConfigured = [
-            ['MyMiddleware1', []],
+            [FooMiddleware::class, []],
             [
-                'MyMiddleware2',
+                BarMiddleware::class,
                 [
                     'foo'   => 'bar',
                     'hello' => 'world',
                 ],
             ],
+        ];
+
+        $middlewareOnceConfigured = [
+            [
+                FooOnceMiddleware::class,
+                [
+                    'foo'   => 'bar',
+                    'hello' => 'world',
+                ],
+            ],
+            [BarOnceMiddleware::class, []],
         ];
 
         $instance = new ClientConfig('clientName', 'serviceName', $data);
@@ -54,6 +74,7 @@ class ClientConfigTest extends TestCase
         $this->assertEquals($data['url'], $instance->url);
         $this->assertEquals($data['clientClass'], $instance->clientClass);
         $this->assertEquals($middlewareConfigured, $instance->middleware);
+        $this->assertEquals($middlewareOnceConfigured, $instance->onceExecutedMiddleware);
         $this->assertEquals($data['queryPreparer'], $instance->queryPreparer);
         $this->assertEquals($data['extendedStubs'], $instance->extendedStubs);
     }
