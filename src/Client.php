@@ -177,9 +177,12 @@ class Client
             }
         }
 
+        $results = $this->results;
+        $this->reset();
+
         return array_values(array_map(static function (Result $item) {
             return $item->get();
-        }, $this->results));
+        }, $results));
     }
 
     /**
