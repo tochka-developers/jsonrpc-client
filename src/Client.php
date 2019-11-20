@@ -151,8 +151,7 @@ class Client
      * Выполняет запрос всех вызовов
      *
      * @return array
-     * @throws \Tochka\JsonRpcClient\Exceptions\ResponseException
-     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     * @throws \Exception
      */
     protected function _execute(): array
     {
@@ -164,21 +163,26 @@ class Client
 
         $responses = $this->transportClient->get($requests, $this->config);
 
-        foreach ($responses as $response) {
-            if (isset($this->requests[$response->id])) {
-                $this->requests[$response->id]->setJsonRpcResponse($response);
-                $this->results[$response->id] = $this->requests[$response->id]->getResult();
-            } else {
-                if (!empty($response->error)) {
-                    throw new ResponseException($response->error);
+        try {
+            foreach ($responses as $response) {
+                if (isset($this->requests[$response->id])) {
+                    $this->requests[$response->id]->setJsonRpcResponse($response);
+                    $this->results[$response->id] = $this->requests[$response->id]->getResult();
+                } else {
+                    if (!empty($response->error)) {
+                        throw new ResponseException($response->error);
+                    }
+
+                    throw new JsonRpcClientException(0, 'Unknown response');
                 }
-
-                throw new JsonRpcClientException(0, 'Unknown response');
             }
-        }
 
-        $results = $this->results;
-        $this->reset();
+            $results = $this->results;
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
+            $this->reset();
+        }
 
         return array_values(array_map(static function (Result $item) {
             return $item->get();
