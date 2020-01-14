@@ -103,7 +103,7 @@ class MiddlewarePipeline extends Pipeline
                 continue;
             }
 
-            switch ((string) $type) {
+            switch ($type->getName()) {
                 case ClientConfig::class:
                     $value = $this->clientConfig;
                     break;
