@@ -27,7 +27,7 @@ class DefaultQueryPreparer implements QueryPreparer
         try {
             $reflection = new \ReflectionClass($clientFacade);
         } catch (\ReflectionException $e) {
-            throw new JsonRpcClientException('Cannot parse proxy class DockBlock: ' . $e->getMessage());
+            throw new JsonRpcClientException(0, 'Cannot parse proxy class DocBlock: ' . $e->getMessage());
         }
 
         $docs = $reflection->getDocComment();
@@ -83,7 +83,7 @@ class DefaultQueryPreparer implements QueryPreparer
         $inputArguments = [];
         $method = $this->methods[$methodName] ?? null;
         if (!$method) {
-            throw new JsonRpcClientException('Method not found in proxy class');
+            throw new JsonRpcClientException(0, 'Method not found in proxy class');
         }
         $arguments = $method->getArguments();
 
