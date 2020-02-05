@@ -3,6 +3,14 @@
 namespace Tochka\JsonRpcClient\QueryPreparers;
 
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\Float_;
+use phpDocumentor\Reflection\Types\Integer;
+use phpDocumentor\Reflection\Types\Null_;
+use phpDocumentor\Reflection\Types\Object_;
+use phpDocumentor\Reflection\Types\String_;
 use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Contracts\QueryPreparer;
 use Tochka\JsonRpcClient\DocBlock\Method;
@@ -16,9 +24,10 @@ class DefaultQueryPreparer implements QueryPreparer
     /**
      * @param \Tochka\JsonRpcClient\ClientConfig $config
      *
+     * @return void
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
-    protected function mapMethods(ClientConfig $config)
+    protected function mapMethods(ClientConfig $config): void
     {
         $clientFacade = $config->clientClass;
 
@@ -41,30 +50,70 @@ class DefaultQueryPreparer implements QueryPreparer
     }
 
     /**
-     * cast primitive types
+     * @param        $value
+     * @param array  $argument
+     * @param string $method
      *
-     * @param $param
-     * @param $argument
-     *
-     * @return mixed
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
-    protected function castType($param, $argument)
+    protected function checkType($value, array $argument, string $method): void
     {
-        $typeObject = $argument['type'];
-        if (!\in_array((string) $typeObject, [
-            'bool',
-            'int',
-            'float',
-            'string',
-            'null',
-        ])) {
-            return $param;
+        $typesArray = [];
+        $argumentName = $argument['name'];
+        $type = $argument['type'];
+        if ($type instanceof Compound) {
+            foreach ($type as $item) {
+                $typesArray[] = $item;
+            }
+        } else {
+            $typesArray[] = $type;
         }
 
-        \settype($param, (string) $typeObject);
+        foreach ($typesArray as $singleType) {
+            $class = get_class($singleType);
+            switch ($class) {
+                case Null_::class:
+                    if (is_null($value)) {
+                        return;
+                    }
+                    break;
+                case Boolean::class:
+                    if (is_bool($value)) {
+                        return;
+                    }
+                    break;
+                case Integer::class:
+                    if (is_int($value)) {
+                        return;
+                    }
+                    break;
+                case Float_::class:
+                    if (is_float($value)) {
+                        return;
+                    }
+                    break;
+                case String_::class:
+                    if (is_string($value)) {
+                        return;
+                    }
+                    break;
+                case Object_::class:
+                    if (is_object($value)) {
+                        return;
+                    }
+                    break;
+                case Array_::class;
+                    if (is_array($value)) {
+                        return;
+                    }
+                    break;
+            }
+        }
 
-        return $param;
+        $messageType = 'expected ' . (string) $type . ' got ' . gettype($value) . ' in method ' . $method;
+        throw new JsonRpcClientException(0, 'invalid param ' . $argumentName . ', ' . $messageType);
     }
+
 
     /**
      * @param string       $methodName
@@ -89,7 +138,8 @@ class DefaultQueryPreparer implements QueryPreparer
 
         for ($i = 0, $iMax = \count($params); $i < $iMax; $i++) {
             if (isset($arguments[$i])) {
-                $inputArguments[$arguments[$i]['name']] = $this->castType($params[$i], $arguments[$i]);
+                $this->checkType($params[$i], $arguments[$i], $methodName);
+                $inputArguments[$arguments[$i]['name']] = $params[$i];
             }
         }
 
