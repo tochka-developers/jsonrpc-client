@@ -8,7 +8,9 @@ use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
+use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Null_;
+use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use Tochka\JsonRpcClient\ClientConfig;
@@ -65,6 +67,9 @@ class DefaultQueryPreparer implements QueryPreparer
             foreach ($type as $item) {
                 $typesArray[] = $item;
             }
+        } elseif ($type instanceof Nullable) {
+            $typesArray[] = new Null_();
+            $typesArray[] = $type->getActualType();
         } else {
             $typesArray[] = $type;
         }
@@ -72,6 +77,8 @@ class DefaultQueryPreparer implements QueryPreparer
         foreach ($typesArray as $singleType) {
             $class = get_class($singleType);
             switch ($class) {
+                case Mixed_::class:
+                    return;
                 case Null_::class:
                     if (is_null($value)) {
                         return;
@@ -111,7 +118,8 @@ class DefaultQueryPreparer implements QueryPreparer
         }
 
         $messageType = 'expected ' . (string) $type . ' got ' . gettype($value) . ' in method ' . $method;
-        throw new JsonRpcClientException(0, 'invalid param ' . $argumentName . ', ' . $messageType);
+        throw new JsonRpcClientException(0,
+            'jsonrpc client error: invalid param ' . $argumentName . ', ' . $messageType);
     }
 
 

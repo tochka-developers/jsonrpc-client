@@ -7,7 +7,9 @@ use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
+use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Null_;
+use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use PHPUnit\Framework\TestCase;
@@ -66,6 +68,11 @@ class DefaultQueryPreparerTest extends TestCase
                 $this->wrapType(new Compound([new Integer(), new Boolean(), new Null_()])),
                 true,
             ],
+            // nullable
+            'type nullable'                => [1, $this->wrapType(new Nullable(new Integer())), false],
+            'type nullable null'           => [null, $this->wrapType(new Nullable(new Integer())), false],
+            'type nullable bad type'       => ['string', $this->wrapType(new Nullable(new Integer())), true],
+            'mixed'                        => ['chot', $this->wrapType(new Mixed_()), false],
         ];
     }
 
@@ -127,6 +134,8 @@ class DefaultQueryPreparerTest extends TestCase
      * @param array  $types
      *
      * @throws \ReflectionException
+     *
+     * @covers \Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer::mapMethods
      */
     public function testMapMethods(string $methodName, array $types)
     {
@@ -143,6 +152,7 @@ class DefaultQueryPreparerTest extends TestCase
     /**
      * @throws \ReflectionException
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     * @covers \Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer::prepare()
      */
     public function testPrepareMethodNotFound()
     {
@@ -155,6 +165,7 @@ class DefaultQueryPreparerTest extends TestCase
     /**
      * @throws \ReflectionException
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     * @covers \Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer::prepare()
      */
     public function testPrepare()
     {
@@ -169,5 +180,17 @@ class DefaultQueryPreparerTest extends TestCase
         $this->assertNotNull($jsonRpcRequest->id);
         $this->assertSame('one', $jsonRpcRequest->method);
         $this->assertSame(['first' => 5, 'second' => '6'], $jsonRpcRequest->params);
+    }
+
+    /**
+     * @throws \ReflectionException
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     * @covers \Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer::prepare()
+     */
+    public function testPrepareMapMethodsIfNotMapped()
+    {
+        $preparer = new DefaultQueryPreparer();
+        $preparer->prepare('name_intMethod', [5, '6'], $this->makeConfig());
+        $this->assertNotEmpty($this->getProperty($preparer, 'methods'));
     }
 }

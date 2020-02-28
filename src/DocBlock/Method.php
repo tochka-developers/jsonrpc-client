@@ -19,7 +19,7 @@ class Method extends BaseTag implements StaticMethod
     protected const REGEXP_METHOD = /** @lang text */
         '/((?<isStatic>static)? +)?(?<type>([a-z\[\]\_]+)[ ]+)?(?<methodName>[a-z0-9\_]+)\((?<arguments>[^\)]*)\)[ \n]*(?<description>.+)?/is';
     protected const REGEXP_ARGUMENT = /** @lang text */
-        '/(?<type>([a-z\[\]\_|]+)[ ]+)?\$(?<argumentName>[a-z0-9\_]+)/is';
+        '/(?<type>(\??[a-z\[\]\_|]+)[ ]+)?\$(?<argumentName>[a-z0-9\_]+)(\s*=\s*)?(?<default>(\S*))/is';
     protected const TAG_NAME = 'method';
 
     /** @var string */
@@ -87,6 +87,13 @@ class Method extends BaseTag implements StaticMethod
                 $argument = [
                     'name' => $matches['argumentName'],
                 ];
+
+                // if T $value = null, make T|null $value
+                if (($matches['default'] ?? null) === 'null' && $matches['type'] ?? false) {
+                    if (strpos($matches['type'], '?') === false && strpos($matches['type'], 'null') === false) {
+                        $matches['type'] = trim($matches['type']) . '|null';
+                    }
+                }
 
                 /** @noinspection NullPointerExceptionInspection */
                 $type = $typeResolver->resolve($matches['type'] ?? 'mixed', $context);
