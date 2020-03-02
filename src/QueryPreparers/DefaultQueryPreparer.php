@@ -44,10 +44,10 @@ class DefaultQueryPreparer implements QueryPreparer
         $docs = $reflection->getDocComment();
 
         $docBlock = $docFactory->create($docs);
-        /** @var Method[] $methods */
-        $methods = $docBlock->getTagsByName('method');
-        foreach ($methods as $method) {
-            $this->methods[$method->getMethodName()] = $method;
+        /** @var Method[] $docBlockMethods */
+        $docBlockMethods = $docBlock->getTagsByName('method');
+        foreach ($docBlockMethods as $docBlockMethod) {
+            $this->methods[$docBlockMethod->getMethodName()] = $docBlockMethod;
         }
     }
 
@@ -76,50 +76,23 @@ class DefaultQueryPreparer implements QueryPreparer
 
         foreach ($typesArray as $singleType) {
             $class = get_class($singleType);
-            switch ($class) {
-                case Mixed_::class:
-                    return;
-                case Null_::class:
-                    if (is_null($value)) {
-                        return;
-                    }
-                    break;
-                case Boolean::class:
-                    if (is_bool($value)) {
-                        return;
-                    }
-                    break;
-                case Integer::class:
-                    if (is_int($value)) {
-                        return;
-                    }
-                    break;
-                case Float_::class:
-                    if (is_float($value)) {
-                        return;
-                    }
-                    break;
-                case String_::class:
-                    if (is_string($value)) {
-                        return;
-                    }
-                    break;
-                case Object_::class:
-                    if (is_object($value)) {
-                        return;
-                    }
-                    break;
-                case Array_::class;
-                    if (is_array($value)) {
-                        return;
-                    }
-                    break;
+            if (
+                $class === Mixed_::class
+                || ($class === Null_::class && $value === null)
+                || ($class === Boolean::class && is_bool($value))
+                || ($class === Integer::class && is_int($value))
+                || ($class === Float_::class && is_float($value))
+                || ($class === String_::class && is_string($value))
+                || ($class === Object_::class && is_object($value))
+                || ($class === Array_::class && is_array($value))
+            ) {
+                return;
             }
         }
 
         $messageType = 'expected ' . (string) $type . ' got ' . gettype($value) . ' in method ' . $method;
         throw new JsonRpcClientException(0,
-            'jsonrpc client error: invalid param ' . $argumentName . ', ' . $messageType);
+            'Error while mapping jsonrpc client method parameter: ' . $argumentName . ', ' . $messageType);
     }
 
 

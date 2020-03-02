@@ -5,6 +5,7 @@ namespace Tochka\JsonRpcClient\Middleware;
 use Illuminate\Pipeline\Pipeline;
 use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Contracts\TransportClient;
+use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 
 class MiddlewarePipeline extends Pipeline
 {
@@ -74,6 +75,7 @@ class MiddlewarePipeline extends Pipeline
      * @return array
      * @throws \ReflectionException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     protected function parseAssociatedParams(array $pipe): array
     {
@@ -95,7 +97,7 @@ class MiddlewarePipeline extends Pipeline
             $type = $reflectionParameters[$i]->getType();
             if ($type === null || $type->isBuiltin()) {
                 if (!$reflectionParameters[$i]->isOptional()) {
-                    throw new \RuntimeException('Error while handling middleware: unknown parameter ' . $reflectionParamName);
+                    throw new JsonRpcClientException(0, 'Error while handling middleware: unknown parameter ' . $reflectionParamName);
                 }
 
                 // получим значение аргумента по умолчанию

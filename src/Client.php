@@ -79,7 +79,7 @@ class Client
 
     /**
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @return \Tochka\JsonRpcClient\Client
      */
@@ -155,13 +155,13 @@ class Client
      */
     protected function _execute(): array
     {
-        $requests = $this->handleMiddleware();
+        $executedRequests = $this->handleMiddleware();
 
-        if (!\count($requests)) {
+        if (!\count($executedRequests)) {
             return [];
         }
 
-        $responses = $this->transportClient->get($requests, $this->config);
+        $responses = $this->transportClient->get($executedRequests, $this->config);
 
         try {
             foreach ($responses as $response) {
@@ -176,17 +176,13 @@ class Client
                     throw new JsonRpcClientException(0, 'Unknown response');
                 }
             }
-
-            $results = $this->results;
-        } catch (\Exception $e) {
-            throw $e;
         } finally {
             $this->reset();
         }
 
         return array_values(array_map(static function (Result $item) {
             return $item->get();
-        }, $results));
+        }, $this->results));
     }
 
     /**
@@ -197,7 +193,7 @@ class Client
         $pipeline = new MiddlewarePipeline(Container::getInstance());
         $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
 
-        $requests = [];
+        $executedRequests = [];
         foreach ($this->requests as $request) {
             $request = $pipeline->send($request)
                 ->through($this->config->middleware)
@@ -209,18 +205,16 @@ class Client
                 });
 
             if ($request) {
-                $requests[] = $request;
+                $executedRequests[] = $request;
             }
         }
 
-        $requests = $pipeline->send($requests)
+        return $pipeline->send($executedRequests)
             ->through($this->config->onceExecutedMiddleware)
             ->via('handle')
             ->then(static function (array $requests) {
                 return $requests;
             });
-
-        return $requests;
     }
 
     protected function reset(): void

@@ -3,6 +3,7 @@
 namespace Tochka\JsonRpcClient;
 
 use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
+use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
 
 class ClientConfig
@@ -17,13 +18,22 @@ class ClientConfig
     public $onceExecutedMiddleware = [];
     public $queryPreparer;
 
+    /**
+     * ClientConfig constructor.
+     *
+     * @param string $clientName
+     * @param string $serviceName
+     * @param array  $clientConfig
+     *
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     */
     public function __construct(string $clientName, string $serviceName, array $clientConfig)
     {
         $this->clientName = $clientName;
         $this->serviceName = $serviceName;
 
         if (!isset($clientConfig['url'], $clientConfig['clientClass'])) {
-            throw new \RuntimeException('Connection configuration mismatch for: ' . $serviceName);
+            throw new JsonRpcClientException(0, 'Connection configuration mismatch for: ' . $serviceName);
         }
 
         $this->url = $clientConfig['url'];

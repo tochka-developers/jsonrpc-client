@@ -4,6 +4,7 @@ namespace Tochka\JsonRpcClient\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Tochka\JsonRpcClient\ClientConfig;
+use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
 use Tochka\JsonRpcClient\Tests\Helpers\BarMiddleware;
 use Tochka\JsonRpcClient\Tests\Helpers\BarOnceMiddleware;
@@ -17,7 +18,7 @@ class ClientConfigTest extends TestCase
      */
     public function testConstructConfigurationMismatch(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(JsonRpcClientException::class);
         new ClientConfig('clientName', 'serviceName', []);
     }
 
