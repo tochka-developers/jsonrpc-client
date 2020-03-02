@@ -1,4 +1,9 @@
 # JSON-RPC Client (Laravel 5.6, Lumen 5.6)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=alert_status)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=bugs)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=code_smells)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=coverage)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)
+
 ## Описание
 JsonRpc клиент - реализация клиента для JsonRpc-сервера.
 Работает по спецификации JsonRpc 2.0. Протестирован и работает с оригинальным сервером JsonRpc от Tochka.
