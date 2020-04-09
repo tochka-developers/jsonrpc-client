@@ -25,6 +25,10 @@ class DefaultQueryPreparerTest extends TestCase
     use ReflectionTrait;
 
 
+    /**
+     * @return \Tochka\JsonRpcClient\ClientConfig
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     */
     protected function makeConfig(): ClientConfig
     {
         return new ClientConfig('name', 'service', [
@@ -57,6 +61,7 @@ class DefaultQueryPreparerTest extends TestCase
                 $this->wrapType(new Compound([new String_(), new Null_()])),
                 false,
             ],
+            'type array|\\stdClass got array' => [[], $this->wrapType(new Compound([new Array_(), new Object_()])), false],
             // errors
             'type int|null got string'     => ['1', $this->wrapType(new Compound([new Integer(), new Null_()])), true],
             'type int|float got string'    => ['1', $this->wrapType(new Compound([new Integer(), new Float_()])), true],
@@ -102,6 +107,7 @@ class DefaultQueryPreparerTest extends TestCase
 
     /**
      * @throws \ReflectionException
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     public function testMapMethodsClassNotFound()
     {
@@ -124,6 +130,7 @@ class DefaultQueryPreparerTest extends TestCase
             'name_intAndBoolAndString' => ['name_intAndBoolAndString', ['int', 'bool', 'string']],
             'name_object'              => ['name_object', ['object']],
             'name_stdClass'            => ['name_stdClass', ['\stdClass']],
+            'name_arrayOrStdClass'     => ['name_arrayOrStdClass', ['array|\stdClass']],
         ];
     }
 
@@ -134,7 +141,7 @@ class DefaultQueryPreparerTest extends TestCase
      * @param array  $types
      *
      * @throws \ReflectionException
-     *
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      * @covers \Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer::mapMethods
      */
     public function testMapMethods(string $methodName, array $types)
