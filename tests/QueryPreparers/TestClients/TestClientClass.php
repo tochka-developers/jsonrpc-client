@@ -18,6 +18,8 @@ namespace Tochka\JsonRpcClient\Tests\QueryPreparers\TestClients;
  * @method static mixed name_object(object $class)
  *
  * @method static mixed name_stdClass(\stdClass $class)
+ *
+ * @method static mixed name_arrayOrStdClass(array|\stdClass $class)
  */
 class TestClientClass
 {
