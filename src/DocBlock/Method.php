@@ -19,7 +19,7 @@ class Method extends BaseTag implements StaticMethod
     protected const REGEXP_METHOD = /** @lang text */
         '/((?<isStatic>static)? +)?(?<type>([a-z\[\]\_]+)[ ]+)?(?<methodName>[a-z0-9\_]+)\((?<arguments>[^\)]*)\)[ \n]*(?<description>.+)?/is';
     protected const REGEXP_ARGUMENT = /** @lang text */
-        '/(?<type>(\??[a-z\[\]\_|]+)[ ]+)?\$(?<argumentName>[a-z0-9\_]+)(\s*=\s*)?(?<default>(\S*))/is';
+        '/(?<type>(\??[\\a-z\[\]\_|]+)[ ]+)?\$(?<argumentName>[a-z0-9\_]+)(\s*=\s*)?(?<default>(\S*))/is';
     protected const TAG_NAME = 'method';
 
     /** @var string */
