@@ -176,13 +176,16 @@ class Client
                     throw new JsonRpcClientException(0, 'Unknown response');
                 }
             }
-        } finally {
-            $this->reset();
-        }
 
-        return array_values(array_map(static function (Result $item) {
-            return $item->get();
-        }, $this->results));
+            return array_values(array_map(static function (Result $item) {
+                return $item->get();
+            }, $this->results));
+
+        } catch(\Throwable $t) {
+            $this->reset();
+
+            return [];
+        }
     }
 
     /**
