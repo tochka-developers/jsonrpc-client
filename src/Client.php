@@ -158,6 +158,8 @@ class Client
         $executedRequests = $this->handleMiddleware();
 
         if (!\count($executedRequests)) {
+            $this->reset();
+            
             return [];
         }
 
