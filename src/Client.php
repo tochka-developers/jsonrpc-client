@@ -163,9 +163,9 @@ class Client
             return [];
         }
 
-        $responses = $this->transportClient->get($executedRequests, $this->config);
-
         try {
+            $responses = $this->transportClient->get($executedRequests, $this->config);
+
             foreach ($responses as $response) {
                 if (isset($this->requests[$response->id])) {
                     $this->requests[$response->id]->setJsonRpcResponse($response);
