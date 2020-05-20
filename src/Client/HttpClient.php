@@ -141,11 +141,11 @@ class HttpClient implements TransportClient
             $rawResponse = $this->client->post($config->url, $this->options)->getBody();
             $responses = \GuzzleHttp\json_decode($rawResponse, false);
         } catch (RequestException $e) {
-            throw new JsonRpcClientException(0, 'http request error: ' . $e->getMessage());
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_HTTP_REQUEST_ERROR, null, $e);
         } catch (InvalidArgumentException $e) {
-            throw new JsonRpcClientException(0, 'response parse error: ' . $e->getMessage());
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_RESPONSE_PARSE_ERROR, null, $e);
         } catch (\Exception $e) {
-            throw new JsonRpcClientException(0, 'unknown request error: ' . $e->getMessage());
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_UNKNOWN_REQUEST_ERROR, null, $e);
         }
 
         if (!\is_array($responses)) {
