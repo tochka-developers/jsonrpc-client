@@ -147,7 +147,7 @@ class Method extends BaseTag implements StaticMethod
         return $this->returnType;
     }
 
-    public function __toString()
+    public function __toString() : string
     {
         $arguments = [];
         foreach ($this->arguments as $argument) {
