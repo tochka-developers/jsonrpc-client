@@ -3,9 +3,12 @@
 namespace Tochka\JsonRpcClient\Client;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\InvalidArgumentException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
 use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Contracts\TransportClient;
+use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 use Tochka\JsonRpcClient\Standard\JsonRpcResponse;
 
@@ -123,6 +126,7 @@ class HttpClient implements TransportClient
      * @param ClientConfig     $config
      *
      * @return \Tochka\JsonRpcClient\Standard\JsonRpcResponse[]
+     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     public function get(array $requests, ClientConfig $config): array
     {
@@ -133,8 +137,17 @@ class HttpClient implements TransportClient
         $body = \count($requests) === 1 ? $requests[0] : $requests;
         $this->setBody($body);
 
-        $rawResponse = $this->client->post($config->url, $this->options)->getBody();
-        $responses = \GuzzleHttp\json_decode($rawResponse, false);
+        try {
+            $rawResponse = $this->client->post($config->url, $this->options)->getBody();
+            $responses = \GuzzleHttp\json_decode($rawResponse, false);
+        } catch (RequestException $e) {
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_HTTP_REQUEST_ERROR, null, $e);
+        } catch (InvalidArgumentException $e) {
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_RESPONSE_PARSE_ERROR, null, $e);
+        } catch (\Exception $e) {
+            throw new JsonRpcClientException(JsonRpcClientException::CODE_UNKNOWN_REQUEST_ERROR, null, $e);
+        }
+
         if (!\is_array($responses)) {
             $responses = [$responses];
         }
