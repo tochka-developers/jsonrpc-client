@@ -31,7 +31,7 @@ class ClientGenerator
         $client = new Client([
             'url' => $this->getUri(),
         ]);
-        $result = $client->get();
+        $result = $client->get($this->getUri());
 
         $smd = json_decode($result, true);
 
