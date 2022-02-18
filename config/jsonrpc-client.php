@@ -35,6 +35,7 @@ return [
                 ],
             ],
             'namedParameters' => true,
+            'options' => [], // Опции соединения
         ],
     ],
 ];

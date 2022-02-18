@@ -44,6 +44,7 @@ class ClientConfigTest extends TestCase
             ],
             'queryPreparer' => 'TestQueryPreparer',
             'extendedStubs' => true,
+            'options'       => ['timeout' => 666],
         ];
 
         $middlewareConfigured = [
@@ -78,6 +79,7 @@ class ClientConfigTest extends TestCase
         $this->assertEquals($middlewareOnceConfigured, $instance->onceExecutedMiddleware);
         $this->assertEquals($data['queryPreparer'], $instance->queryPreparer);
         $this->assertEquals($data['extendedStubs'], $instance->extendedStubs);
+        $this->assertEquals($data['options'], $instance->options);
     }
 
     /**
