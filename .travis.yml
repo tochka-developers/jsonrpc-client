@@ -1,3 +1,4 @@
+dist: focal
 language: php
 
 git:
@@ -12,11 +13,14 @@ env:
   - FRAMEWORK="laravel/framework:6.*"
   - FRAMEWORK="laravel/framework:7.*"
   - FRAMEWORK="laravel/framework:8.*"
+  - FRAMEWORK="laravel/framework:9.*"
 
 php:
   - '7.2'
   - '7.3'
   - '7.4'
+  - '8.0'
+  - '8.1'
 
 script: "vendor/bin/phpunit --no-coverage"
 
@@ -24,10 +28,14 @@ jobs:
   exclude:
     - php: 7.2
       env: FRAMEWORK="laravel/framework:8.*"
+    - php: 7.3
+      env: FRAMEWORK="laravel/framework:9.*"
+    - php: 7.4
+      env: FRAMEWORK="laravel/framework:9.*"
   include:
     - stage: "Sonar Analyze"
-      dist: trusty
-      php: 7.4
+      dist: focal
+      php: 8.0
       env: FRAMEWORK="laravel/framework:8.*"
       install:
         - pecl install pcov

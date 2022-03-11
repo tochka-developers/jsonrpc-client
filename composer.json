@@ -17,15 +17,15 @@
   "require": {
     "php": ">=7.2",
     "ext-json": "*",
-    "illuminate/log": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
-    "illuminate/cache": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
-    "illuminate/config": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
-    "illuminate/container": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
-    "illuminate/console": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
-    "illuminate/support": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
-    "illuminate/pipeline": "5.7.*|5.8.*|^6.0|^7.0|^8.0",
+    "illuminate/log": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/cache": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/config": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/container": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/console": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/support": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
+    "illuminate/pipeline": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
     "tochka-developers/jsonrpc-smd": "^1.0",
-    "phpdocumentor/reflection-docblock": "~4.3|~5.1",
+    "phpdocumentor/reflection-docblock": "^3.0|^4.0|^5.0",
     "guzzlehttp/guzzle": "^6.0|^7.0"
   },
   "require-dev": {
