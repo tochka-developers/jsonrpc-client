@@ -17,6 +17,7 @@ class ClientConfig
     public $middleware = [];
     public $onceExecutedMiddleware = [];
     public $queryPreparer;
+    public $options = [];
 
     /**
      * ClientConfig constructor.
@@ -44,6 +45,7 @@ class ClientConfig
 
         $this->extendedStubs = $clientConfig['extendedStubs'] ?? false;
         $this->queryPreparer = $clientConfig['queryPreparer'] ?? DefaultQueryPreparer::class;
+        $this->options = $clientConfig['options'] ?? [];
     }
 
     /**

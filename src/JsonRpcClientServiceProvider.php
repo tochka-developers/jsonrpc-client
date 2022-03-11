@@ -6,6 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use Tochka\JsonRpcClient\Client\HttpClient;
 use Tochka\JsonRpcClient\Console\GenerateClient;
 
+/**
+ * @codeCoverageIgnore
+ */
 class JsonRpcClientServiceProvider extends ServiceProvider
 {
     public function boot(): void
@@ -31,7 +34,7 @@ class JsonRpcClientServiceProvider extends ServiceProvider
             if (class_exists($clientClass)) {
                 $this->app->singleton($clientClass, function () use ($clientName, $alias, $serviceConfig) {
                     $config = new ClientConfig($clientName, $alias, $serviceConfig);
-                    $client = new HttpClient();
+                    $client = new HttpClient($config->options);
                     $queryPreparer = $this->app->get($config->queryPreparer);
 
                     return new Client($config, $queryPreparer, $client);
