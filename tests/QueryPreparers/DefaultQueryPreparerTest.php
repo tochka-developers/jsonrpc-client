@@ -13,10 +13,10 @@ use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use PHPUnit\Framework\TestCase;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\DocBlock\Method;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 use Tochka\JsonRpcClient\Tests\Helpers\ReflectionTrait;
 use Tochka\JsonRpcClient\Tests\QueryPreparers\TestClients\TestClientClass;
 
@@ -26,7 +26,7 @@ class DefaultQueryPreparerTest extends TestCase
 
 
     /**
-     * @return \Tochka\JsonRpcClient\ClientConfig
+     * @return \Tochka\JsonRpcClient\Support\ClientConfig
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     protected function makeConfig(): ClientConfig

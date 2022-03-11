@@ -3,11 +3,11 @@
 namespace Tochka\JsonRpcClient\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tochka\JsonRpcClient\Result;
 use Tochka\JsonRpcClient\Exceptions\ResponseException;
-use Tochka\JsonRpcClient\Request;
 use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 use Tochka\JsonRpcClient\Standard\JsonRpcResponse;
+use Tochka\JsonRpcClient\Support\Request;
+use Tochka\JsonRpcClient\Support\Result;
 
 class RequestTest extends TestCase
 {

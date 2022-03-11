@@ -132,10 +132,11 @@ batch-запрос с вызовами 3х методов - каждая так�
 В классе middleware должне быть реализован один метод - `handle`. 
 Первые два параметра обязательные.
 Пример middleware для обработки каждого вызова в запросе (первый тип):
+
 ```php
 class SomeMiddleware
 {
-    public function handle(\Tochka\JsonRpcClient\Request $request, \Closure $next): void
+    public function handle(\Tochka\JsonRpcClient\Support\Request $request, \Closure $next): void
     {
         // ...
         return $next($request);
@@ -161,6 +162,7 @@ class SomeMiddleware implements \Tochka\JsonRpcClient\Contracts\OnceExecutedMidd
 актуальную версию $request.
 Кроме того, вы можете в параметрах метода `handle` использовать:
 * дополнительные параметры, передаваемые в конфигурации:
+
 ```php
 // config
 'middleware'  => [
@@ -171,7 +173,6 @@ class SomeMiddleware implements \Tochka\JsonRpcClient\Contracts\OnceExecutedMidd
 ]
 
 // middleware
-use Tochka\JsonRpcClient\Request;
 
 class AuthTokenMiddleware implements \Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware
 {

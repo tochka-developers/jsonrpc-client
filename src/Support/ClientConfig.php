@@ -1,6 +1,6 @@
 <?php
 
-namespace Tochka\JsonRpcClient;
+namespace Tochka\JsonRpcClient\Support;
 
 use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
@@ -8,28 +8,19 @@ use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
 
 class ClientConfig
 {
-    public $serviceName = 'default';
-    public $clientName = 'default';
+    public string $serviceName = 'default';
 
-    public $url;
-    public $clientClass;
-    public $extendedStubs = false;
-    public $middleware = [];
-    public $onceExecutedMiddleware = [];
-    public $queryPreparer;
-
+    public string $url;
+    public string $clientClass;
+    public array $middleware = [];
+    public array $onceExecutedMiddleware = [];
+    public string $queryPreparer;
+    
     /**
-     * ClientConfig constructor.
-     *
-     * @param string $clientName
-     * @param string $serviceName
-     * @param array  $clientConfig
-     *
-     * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
+     * @throws JsonRpcClientException
      */
-    public function __construct(string $clientName, string $serviceName, array $clientConfig)
+    public function __construct(string $serviceName, array $clientConfig)
     {
-        $this->clientName = $clientName;
         $this->serviceName = $serviceName;
 
         if (!isset($clientConfig['url'], $clientConfig['clientClass'])) {
@@ -41,8 +32,7 @@ class ClientConfig
 
         $middleware = $this->parseMiddlewareConfiguration($clientConfig['middleware'] ?? []);
         $this->sortMiddleware($middleware);
-
-        $this->extendedStubs = $clientConfig['extendedStubs'] ?? false;
+        
         $this->queryPreparer = $clientConfig['queryPreparer'] ?? DefaultQueryPreparer::class;
     }
 

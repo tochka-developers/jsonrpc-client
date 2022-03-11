@@ -1,6 +1,6 @@
 <?php
 
-namespace Tochka\JsonRpcClient;
+namespace Tochka\JsonRpcClient\Support;
 
 use Tochka\JsonRpcClient\Exceptions\ResponseException;
 use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
@@ -8,23 +8,20 @@ use Tochka\JsonRpcClient\Standard\JsonRpcResponse;
 
 class Request
 {
-    /** @var \Tochka\JsonRpcClient\Standard\JsonRpcRequest */
-    protected $jsonRpcRequest;
-    /** @var \Tochka\JsonRpcClient\Standard\JsonRpcResponse */
-    protected $jsonRpcResponse;
+    private JsonRpcRequest $jsonRpcRequest;
+    private JsonRpcResponse $jsonRpcResponse;
+    private Result $result;
+    private array $additional = [];
+    private string $clientName;
 
-    protected $result;
-    protected $additional = [];
-
-    public function __construct(JsonRpcRequest $request)
+    public function __construct(JsonRpcRequest $request, string $clientName)
     {
         $this->jsonRpcRequest = $request;
         $this->result = new Result();
+        $this->clientName = $clientName;
     }
 
     /**
-     * @param array $values
-     *
      * @codeCoverageIgnore
      */
     public function setAdditional(array $values): void
@@ -32,19 +29,12 @@ class Request
         $this->additional = $values;
     }
 
-    /**
-     * @param      $key
-     * @param null $default
-     *
-     * @return mixed|null
-     */
     public function getAdditional($key, $default = null)
     {
         return $this->additional[$key] ?? $default;
     }
 
     /**
-     * @return Result
      * @codeCoverageIgnore
      */
     public function getResult(): Result
@@ -53,16 +43,14 @@ class Request
     }
 
     /**
-     * @return string
      * @codeCoverageIgnore
      */
     public function getId(): string
     {
-        return $this->jsonRpcRequest->id;
+        return $this->jsonRpcRequest->getId();
     }
 
     /**
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest
      * @codeCoverageIgnore
      */
     public function getJsonRpcRequest(): JsonRpcRequest
@@ -71,8 +59,6 @@ class Request
     }
 
     /**
-     * @param \Tochka\JsonRpcClient\Standard\JsonRpcRequest $request
-     *
      * @codeCoverageIgnore
      */
     public function setJsonRpcRequest(JsonRpcRequest $request): void
@@ -81,7 +67,6 @@ class Request
     }
 
     /**
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcResponse
      * @codeCoverageIgnore
      */
     public function getJsonRpcResponse(): JsonRpcResponse
@@ -90,18 +75,17 @@ class Request
     }
 
     /**
-     * @param \Tochka\JsonRpcClient\Standard\JsonRpcResponse $response
-     *
-     * @throws \Tochka\JsonRpcClient\Exceptions\ResponseException
+     * @throws ResponseException
      */
     public function setJsonRpcResponse(JsonRpcResponse $response): void
     {
         $this->jsonRpcResponse = $response;
+
         $this->parseResult();
     }
 
     /**
-     * @throws \Tochka\JsonRpcClient\Exceptions\ResponseException
+     * @throws ResponseException
      */
     protected function parseResult(): void
     {
@@ -110,5 +94,10 @@ class Request
         }
 
         $this->result->setResult($this->jsonRpcResponse->result);
+    }
+    
+    public function getClientName(): string
+    {
+        return $this->clientName;
     }
 }

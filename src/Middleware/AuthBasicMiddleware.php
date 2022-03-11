@@ -2,42 +2,34 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use GuzzleHttp\RequestOptions;
-use Tochka\JsonRpcClient\Client\HttpClient;
-use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
-use Tochka\JsonRpcClient\Contracts\TransportClient;
-use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Psr\Http\Message\RequestInterface;
+use Tochka\JsonRpcClient\Contracts\HttpRequestMiddleware;
 
-class AuthBasicMiddleware implements OnceExecutedMiddleware
+class AuthBasicMiddleware implements HttpRequestMiddleware
 {
-    /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param string           $username
-     * @param string           $password
-     * @param string           $scheme
-     *
-     * @return mixed
-     */
-    public function handle(
-        array $requests,
-        \Closure $next,
-        TransportClient $client,
-        $username = '',
-        $password = '',
-        $scheme = 'basic'
-    ) {
-        if (!$client instanceof HttpClient) {
-            return $next($requests);
-        }
-
-        $client->setOption(RequestOptions::AUTH, [
-            $username,
-            $password,
-            $scheme,
-        ]);
-
-        return $next($requests);
+    public const SCHEME_BASIC = 'Basic';
+    public const SCHEME_DIGEST = 'Digest';
+    
+    private string $username;
+    private string $password;
+    private string $scheme;
+    
+    public function __construct(string $username = '', string $password = '', string $scheme = self::SCHEME_BASIC)
+    {
+        $this->username = $username;
+        $this->password = $password;
+        $this->scheme = $scheme;
+    }
+    
+    public function handleHttpRequest(RequestInterface $request, callable $next): array
+    {
+        $header = sprintf(
+            '%s %s',
+            $this->scheme,
+            base64_encode($this->username . ':' . $this->password)
+        );
+        $request = $request->withHeader('Authorization', $header);
+        
+        return $next($request);
     }
 }

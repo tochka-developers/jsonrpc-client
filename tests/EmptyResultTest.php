@@ -3,7 +3,7 @@
 namespace Tochka\JsonRpcClient\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tochka\JsonRpcClient\Result;
+use Tochka\JsonRpcClient\Support\Result;
 
 class EmptyResultTest extends TestCase
 {

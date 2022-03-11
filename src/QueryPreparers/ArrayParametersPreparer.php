@@ -2,16 +2,16 @@
 
 namespace Tochka\JsonRpcClient\QueryPreparers;
 
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Contracts\QueryPreparer;
 use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 
 class ArrayParametersPreparer implements QueryPreparer
 {
     /**
      * @param string                             $method
      * @param array                              $params
-     * @param \Tochka\JsonRpcClient\ClientConfig $config
+     * @param \Tochka\JsonRpcClient\Support\ClientConfig $config
      *
      * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest
      */

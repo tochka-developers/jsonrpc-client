@@ -3,8 +3,8 @@
 namespace Tochka\JsonRpcClient\Console;
 
 use Illuminate\Console\Command;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\ClientGenerator\ClientGenerator;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 
 class GenerateClient extends Command
 {

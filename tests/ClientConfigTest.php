@@ -3,9 +3,9 @@
 namespace Tochka\JsonRpcClient\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 use Tochka\JsonRpcClient\Tests\Helpers\BarMiddleware;
 use Tochka\JsonRpcClient\Tests\Helpers\BarOnceMiddleware;
 use Tochka\JsonRpcClient\Tests\Helpers\FooMiddleware;

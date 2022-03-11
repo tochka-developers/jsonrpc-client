@@ -1,11 +1,12 @@
 <?php
 
-namespace Tochka\JsonRpcClient;
+namespace Tochka\JsonRpcClient\Support;
 
 class Result
 {
-    protected $result;
-
+    /** @var mixed */
+    private $result;
+    
     /**
      * @return mixed
      * @codeCoverageIgnore
@@ -14,9 +15,9 @@ class Result
     {
         return $this->result;
     }
-
+    
     /**
-     * @param $value
+     * @param mixed $value
      *
      * @codeCoverageIgnore
      */
@@ -24,7 +25,7 @@ class Result
     {
         $this->result = $value;
     }
-
+    
     public function __toString()
     {
         return 'The response has not yet been initialized';

@@ -2,42 +2,27 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use Tochka\JsonRpcClient\Client\HttpClient;
-use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
-use Tochka\JsonRpcClient\Contracts\TransportClient;
-use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Psr\Http\Message\RequestInterface;
+use Tochka\JsonRpcClient\Contracts\HttpRequestMiddleware;
 
 /**
  * A middleware allowing for inclusion of additional http headers into the request.
- *
- * @package App\Api\Middleware
  */
-class AdditionalHeadersMiddleware implements OnceExecutedMiddleware
+class AdditionalHeadersMiddleware implements HttpRequestMiddleware
 {
-    /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param array            $headers
-     *
-     * @return mixed
-     */
-    public function handle(array $requests, \Closure $next, TransportClient $client, $headers = [])
+    private array $headers;
+    
+    public function __construct(array $headers = [])
     {
-        if (!$client instanceof HttpClient) {
-            return $next($requests);
+        $this->headers = $headers;
+    }
+    
+    public function handleHttpRequest(RequestInterface $request, callable $next): array
+    {
+        foreach ($this->headers as $key => $value) {
+            $request = $request->withHeader($key, $value);
         }
-
-        foreach ($headers as $key => $value) {
-            if (!\is_array($value)) {
-                $value = [$value];
-            }
-
-            foreach ($value as $element) {
-                $client->setHeader($key, $element);
-            }
-        }
-
-        return $next($requests);
+        
+        return $next($request);
     }
 }

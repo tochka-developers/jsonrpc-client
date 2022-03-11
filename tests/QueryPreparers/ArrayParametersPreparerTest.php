@@ -3,8 +3,8 @@
 namespace Tochka\JsonRpcClient\Tests\QueryPreparers;
 
 use PHPUnit\Framework\TestCase;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\QueryPreparers\ArrayParametersPreparer;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 
 class ArrayParametersPreparerTest extends TestCase
 {

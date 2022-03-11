@@ -2,35 +2,26 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use Tochka\JsonRpcClient\Client\HttpClient;
-use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
-use Tochka\JsonRpcClient\Contracts\TransportClient;
-use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Psr\Http\Message\RequestInterface;
+use Tochka\JsonRpcClient\Contracts\HttpRequestMiddleware;
 
-class AuthTokenMiddleware implements OnceExecutedMiddleware
+class AuthTokenMiddleware implements HttpRequestMiddleware
 {
-    /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param string           $value
-     * @param string           $name
-     *
-     * @return mixed
-     */
-    public function handle(
-        array $requests,
-        \Closure $next,
-        TransportClient $client,
-        $value,
-        $name = 'X-Access-Key'
-    ) {
-        if (!$client instanceof HttpClient) {
-            return $next($requests);
-        }
-
-        $client->setHeader($name, $value);
-
-        return $next($requests);
+    public const DEFAULT_HEADER = 'X-Access-Key';
+    
+    private string $token;
+    private string $header;
+    
+    public function __construct(string $value, string $name = self::DEFAULT_HEADER)
+    {
+        $this->token = $value;
+        $this->header = $name;
+    }
+    
+    public function handleHttpRequest(RequestInterface $request, callable $next): array
+    {
+        $request = $request->withHeader($this->header, $this->token);
+        
+        return $next($request);
     }
 }
