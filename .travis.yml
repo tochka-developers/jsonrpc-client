@@ -1,4 +1,4 @@
-dist: focal
+dist: bionic
 language: php
 
 git:
@@ -20,7 +20,7 @@ php:
   - '7.3'
   - '7.4'
   - '8.0'
-  - '8.1'
+  - '8.1.2'
 
 script: "vendor/bin/phpunit --no-coverage"
 
@@ -28,13 +28,23 @@ jobs:
   exclude:
     - php: 7.2
       env: FRAMEWORK="laravel/framework:8.*"
+    - php: 7.2
+      env: FRAMEWORK="laravel/framework:9.*"
     - php: 7.3
       env: FRAMEWORK="laravel/framework:9.*"
     - php: 7.4
       env: FRAMEWORK="laravel/framework:9.*"
+    - php: 8.0
+      env: FRAMEWORK="laravel/framework:5.7.*"
+    - php: 8.0
+      env: FRAMEWORK="laravel/framework:5.8.*"
+    - php: 8.1.2
+      env: FRAMEWORK="laravel/framework:5.7.*"
+    - php: 8.1.2
+      env: FRAMEWORK="laravel/framework:5.8.*"
   include:
     - stage: "Sonar Analyze"
-      dist: focal
+      dist: bionic
       php: 8.0
       env: FRAMEWORK="laravel/framework:8.*"
       install:
