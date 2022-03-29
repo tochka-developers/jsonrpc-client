@@ -71,10 +71,10 @@ class Client
      */
     protected function _batch(): self
     {
-        $this->reset();
-        $this->executeImmediately = false;
+        $instanceBatch = new self($this->config, $this->queryPreparer, $this->transportClient);
+        $instanceBatch->executeImmediately = false;
 
-        return $this;
+        return $instanceBatch;
     }
 
     /**
