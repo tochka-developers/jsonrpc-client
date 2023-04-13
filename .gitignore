@@ -1,5 +1,5 @@
 .idea
-nbproject
 vendor
 composer.lock
+/nbproject
 .phpunit.result.cache

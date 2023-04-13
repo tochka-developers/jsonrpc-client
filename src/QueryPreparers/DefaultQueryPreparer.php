@@ -13,18 +13,18 @@ use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Nullable;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Contracts\QueryPreparer;
 use Tochka\JsonRpcClient\DocBlock\Method;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 
 class DefaultQueryPreparer implements QueryPreparer
 {
     protected $methods = [];
 
     /**
-     * @param \Tochka\JsonRpcClient\ClientConfig $config
+     * @param \Tochka\JsonRpcClient\Support\ClientConfig $config
      *
      * @return void
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException

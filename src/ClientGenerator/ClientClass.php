@@ -2,7 +2,7 @@
 
 namespace Tochka\JsonRpcClient\ClientGenerator;
 
-use Tochka\JsonRpcClient\ClientConfig;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 use Tochka\JsonRpcSmd\SmdDescription;
 
 /**
@@ -56,7 +56,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * {$this->classDescription}@author JsonRpcClientGenerator
  * @date {$this->getDate()}
- * @mixin \Tochka\JsonRpcClient\Client
+ * @mixin \Tochka\JsonRpcClient\LegacyClient
 {$this->methodSource}
  */
 class {$this->className} extends Facade

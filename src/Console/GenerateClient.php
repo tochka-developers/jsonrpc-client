@@ -3,8 +3,8 @@
 namespace Tochka\JsonRpcClient\Console;
 
 use Illuminate\Console\Command;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\ClientGenerator\ClientGenerator;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 
 class GenerateClient extends Command
 {
@@ -38,11 +38,11 @@ class GenerateClient extends Command
     {
         $this->info('Generate client class for connection: ' . $connection);
 
-        $services = config('jsonrpc-client.connections', []);
-        $clientName = config('jsonrpc-client.clientName', []);
-        $config = new ClientConfig($clientName, $connection, $services[$connection] ?? []);
-
-        (new ClientGenerator($config))->generate();
-        $this->info('Success!');
+//        $services = config('jsonrpc-client.connections', []);
+//        $clientName = config('jsonrpc-client.clientName', []);
+//        //$config = new ClientConfig($clientName, $connection, $services[$connection] ?? []);
+//
+//        (new ClientGenerator($config))->generate();
+//        $this->info('Success!');
     }
 }

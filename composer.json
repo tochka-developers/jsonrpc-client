@@ -1,52 +1,72 @@
 {
-  "name": "tochka-developers/jsonrpc-client",
-  "description": "JsonRpc Client for Laravel",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Pavel Babushkin",
-      "email": "darkdarin@tochka.com"
+    "name": "tochka-developers/jsonrpc-client",
+    "description": "JsonRpc Client for Laravel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pavel Babushkin",
+            "email": "darkdarin@tochka.com"
+        }
+    ],
+    "keywords": [
+        "jsonrpc",
+        "jsonrpc-client",
+        "laravel"
+    ],
+    "require": {
+        "php": ">=8.0",
+        "ext-json": "*",
+        "illuminate/log": "^9.0",
+        "illuminate/cache": "^9.0",
+        "illuminate/config": "^9.0",
+        "illuminate/container": "^9.0",
+        "illuminate/console": "^9.0",
+        "illuminate/support": "^9.0",
+        "illuminate/pipeline": "^9.0",
+        "tochka-developers/jsonrpc-annotations": "^1.3",
+        "tochka-developers/jsonrpc-standard": "^1.3",
+        "php-http/discovery": "^1.15",
+        "psr/http-client": "^1.0",
+        "psr/http-client-implementation": "1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-factory-implementation": "1.0"
+    },
+    "require-dev": {
+        "bensampo/laravel-enum": "^5.0",
+        "laravel/pint": "^1.4",
+        "mockery/mockery": "^1.0",
+        "php-http/mock-client": "^1.5",
+        "orchestra/testbench": "^7.1",
+        "phpunit/phpunit": "^9.6",
+        "roave/security-advisories": "dev-latest",
+        "timacdonald/log-fake": "^2.0",
+        "vimeo/psalm": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tochka\\JsonRpcClient\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tochka\\JsonRpcClient\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tochka\\JsonRpcClient\\JsonRpcClientServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "lint": "php8.1 vendor/bin/pint --test",
+        "lint-fix": "php8.1 vendor/bin/pint",
+        "analyze": "php8.1 vendor/bin/psalm --php-version=8.1 --no-cache"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": false
+        }
     }
-  ],
-  "keywords": [
-    "jsonrpc",
-    "jsonrpc-client",
-    "client",
-    "laravel"
-  ],
-  "require": {
-    "php": ">=7.2",
-    "ext-json": "*",
-    "illuminate/log": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/cache": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/config": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/container": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/console": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/support": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "illuminate/pipeline": "5.7.*|5.8.*|^6.0|^7.0|^8.0|^9.0",
-    "tochka-developers/jsonrpc-smd": "^1.0",
-    "phpdocumentor/reflection-docblock": "^3.0|^4.0|^5.0",
-    "guzzlehttp/guzzle": "^6.0|^7.0"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^8.0|^9.0",
-    "mockery/mockery": "^1.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "Tochka\\JsonRpcClient\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tochka\\JsonRpcClient\\Tests\\": "tests/"
-    }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Tochka\\JsonRpcClient\\JsonRpcClientServiceProvider"
-      ]
-    }
-  }
 }

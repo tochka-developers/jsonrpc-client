@@ -4,9 +4,9 @@ namespace Tochka\JsonRpcClient\ClientGenerator;
 
 use GuzzleHttp\Client;
 use RuntimeException;
-use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\HttpClient;
+use Tochka\JsonRpcClient\Support\ClientConfig;
 use Tochka\JsonRpcSmd\SmdDescription;
 
 class ClientGenerator

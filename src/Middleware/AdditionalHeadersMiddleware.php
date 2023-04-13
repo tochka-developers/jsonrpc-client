@@ -2,42 +2,39 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use Tochka\JsonRpcClient\Client\HttpClient;
-use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
-use Tochka\JsonRpcClient\Contracts\TransportClient;
-use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Psr\Http\Message\ResponseInterface;
+use Tochka\JsonRpcClient\Contracts\HttpRequestMiddlewareInterface;
+use Tochka\JsonRpcClient\DTO\JsonRpcRequestContainer;
 
 /**
  * A middleware allowing for inclusion of additional http headers into the request.
- *
- * @package App\Api\Middleware
+ * @psalm-api
  */
-class AdditionalHeadersMiddleware implements OnceExecutedMiddleware
+class AdditionalHeadersMiddleware implements HttpRequestMiddlewareInterface
 {
-    /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param array            $headers
-     *
-     * @return mixed
-     */
-    public function handle(array $requests, \Closure $next, TransportClient $client, $headers = [])
+    private array $headers;
+
+    public function __construct(array $headers = [])
     {
-        if (!$client instanceof HttpClient) {
-            return $next($requests);
-        }
+        $this->headers = $headers;
+    }
 
-        foreach ($headers as $key => $value) {
-            if (!\is_array($value)) {
-                $value = [$value];
+    public function handleHttpRequest(JsonRpcRequestContainer $request, callable $next): ?ResponseInterface
+    {
+        $httpRequest = $request->getRequest();
+
+        foreach ($this->headers as $key => $headers) {
+            if (!is_array($headers)) {
+                $headers = [$headers];
             }
 
-            foreach ($value as $element) {
-                $client->setHeader($key, $element);
+            foreach ($headers as $headerValue) {
+                $httpRequest = $httpRequest->withAddedHeader($key, $headerValue);
             }
         }
 
-        return $next($requests);
+        $request->setRequest($httpRequest);
+
+        return $next($request);
     }
 }

@@ -2,35 +2,32 @@
 
 namespace Tochka\JsonRpcClient\Middleware;
 
-use Tochka\JsonRpcClient\Client\HttpClient;
-use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
-use Tochka\JsonRpcClient\Contracts\TransportClient;
-use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
+use Psr\Http\Message\ResponseInterface;
+use Tochka\JsonRpcClient\Contracts\HttpRequestMiddlewareInterface;
+use Tochka\JsonRpcClient\DTO\JsonRpcRequestContainer;
 
-class AuthTokenMiddleware implements OnceExecutedMiddleware
+/**
+ * @psalm-api
+ */
+class AuthTokenMiddleware implements HttpRequestMiddlewareInterface
 {
-    /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param string           $value
-     * @param string           $name
-     *
-     * @return mixed
-     */
-    public function handle(
-        array $requests,
-        \Closure $next,
-        TransportClient $client,
-        $value,
-        $name = 'X-Access-Key'
-    ) {
-        if (!$client instanceof HttpClient) {
-            return $next($requests);
-        }
+    private string $token;
+    private string $headerName;
 
-        $client->setHeader($name, $value);
+    public function __construct(string $token, string $headerName = 'X-Access-Key')
+    {
+        $this->token = $token;
+        $this->headerName = $headerName;
+    }
 
-        return $next($requests);
+    public function handleHttpRequest(JsonRpcRequestContainer $request, callable $next): ?ResponseInterface
+    {
+        $httpRequest = $request->getRequest();
+
+        $httpRequest = $httpRequest->withHeader($this->headerName, $this->token);
+
+        $request->setRequest($httpRequest);
+
+        return $next($request);
     }
 }
