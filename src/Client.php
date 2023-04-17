@@ -7,7 +7,9 @@ use Tochka\JsonRpcClient\Contracts\QueryPreparer;
 use Tochka\JsonRpcClient\Contracts\TransportClient;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 use Tochka\JsonRpcClient\Exceptions\ResponseException;
+use Tochka\JsonRpcClient\Facades\MiddlewareRegistry as MiddlewareRegistryFacade;
 use Tochka\JsonRpcClient\Middleware\MiddlewarePipeline;
+use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 
 /**
  * Class Client
@@ -22,32 +24,26 @@ use Tochka\JsonRpcClient\Middleware\MiddlewarePipeline;
  */
 class Client
 {
-    /** @var \Tochka\JsonRpcClient\ClientConfig */
-    protected $config;
-    /** @var bool */
-    protected $executeImmediately = true;
-
-    /** @var \Tochka\JsonRpcClient\Request[] */
-    protected $requests = [];
-    /** @var array */
-    protected $results = [];
-
-    /** @var array */
-    protected $additionalValues = [];
-    /** @var QueryPreparer */
-    protected $queryPreparer;
-    /** @var \Tochka\JsonRpcClient\Contracts\TransportClient */
-    protected $transportClient;
-
+    protected ClientConfig $config;
+    protected bool $executeImmediately = true;
+    
+    /** @var Request[] */
+    protected array $requests = [];
+    protected array $results = [];
+    
+    protected array $additionalValues = [];
+    protected QueryPreparer $queryPreparer;
+    protected TransportClient $transportClient;
+    
     public function __construct(ClientConfig $config, QueryPreparer $queryPreparer, TransportClient $client)
     {
         $this->reset();
-
+        
         $this->config = $config;
         $this->queryPreparer = $queryPreparer;
         $this->transportClient = $client;
     }
-
+    
     /**
      * @param $method
      * @param $params
@@ -60,10 +56,10 @@ class Client
         if (method_exists($this, '_' . $method)) {
             return $this->{'_' . $method}(...$params);
         }
-
+        
         return $this->_call($method, $params);
     }
-
+    
     /**
      * Помечает экземпляр клиента как массив вызовов
      *
@@ -73,23 +69,23 @@ class Client
     {
         $instanceBatch = new self($this->config, $this->queryPreparer, $this->transportClient);
         $instanceBatch->executeImmediately = false;
-
+        
         return $instanceBatch;
     }
-
+    
     /**
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return \Tochka\JsonRpcClient\Client
      */
     protected function _with(string $name, $value): self
     {
         $this->additionalValues[$name] = $value;
-
+        
         return $this;
     }
-
+    
     /**
      * @param array $values
      *
@@ -98,10 +94,10 @@ class Client
     protected function _withValues(array $values): self
     {
         $this->additionalValues = array_merge($this->additionalValues, $values);
-
+        
         return $this;
     }
-
+    
     /**
      * Помечает вызываемый метод кешируемым
      *
@@ -112,16 +108,16 @@ class Client
     protected function _cache($minutes = -1): self
     {
         $this->additionalValues['cache'] = $minutes;
-
+        
         return $this;
     }
-
+    
     /** @noinspection MagicMethodsValidityInspection */
     /**
      * Выполняет удаленный вызов (либо добавляет его в массив)
      *
      * @param string $method
-     * @param array  $params
+     * @param array $params
      *
      * @return mixed
      * @throws \Exception
@@ -131,22 +127,32 @@ class Client
         $jsonRpcRequest = $this->queryPreparer->prepare($method, $params, $this->config);
         $request = new Request($jsonRpcRequest);
         $request->setAdditional($this->additionalValues);
-
+        
         $this->additionalValues = [];
-
+        
+        $pipeline = new MiddlewarePipeline(Container::getInstance());
+        $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
+        
+        
+        $request = $pipeline->send($request)
+            ->through(MiddlewareRegistryFacade::getMiddleware($this->config->serviceName))
+            ->via('handle')
+            ->thenReturn();
+        
+        
         $this->requests[$request->getId()] = $request;
         $this->results[$request->getId()] = $this->requests[$request->getId()]->getResult();
-
+        
         if ($this->executeImmediately) {
             $result = $this->_execute();
             if (\count($result) > 0) {
                 return $result[0];
             }
         }
-
+        
         return $this->results[$request->getId()];
     }
-
+    
     /**
      * Выполняет запрос всех вызовов
      *
@@ -155,70 +161,61 @@ class Client
      */
     protected function _execute(): array
     {
-        $executedRequests = $this->handleMiddleware();
-
-        if (!\count($executedRequests)) {
-            $this->reset();
-            
-            return [];
-        }
-
+        $pipeline = new MiddlewarePipeline(Container::getInstance());
+        $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
+        
+        $jsonRpcRequests = array_values(
+            array_filter(
+                array_map(function (Request $request): ?JsonRpcRequest {
+                    return ($request->getResult() instanceof Result)
+                        ? $request->getJsonRpcRequest()
+                        : null;
+                }, $this->requests)
+            )
+        );
+        
         try {
-            $responses = $this->transportClient->get($executedRequests, $this->config);
-
-            foreach ($responses as $response) {
-                if (isset($this->requests[$response->id])) {
-                    $this->requests[$response->id]->setJsonRpcResponse($response);
-                    $this->results[$response->id] = $this->requests[$response->id]->getResult();
-                } else {
-                    if (!empty($response->error)) {
-                        throw new ResponseException($response->error);
-                    }
-
-                    throw new JsonRpcClientException(0, 'Unknown response');
-                }
-            }
-
-            return array_values(array_map(static function (Result $item) {
-                return $item->get();
-            }, $this->results));
+            return $pipeline->send($jsonRpcRequests)
+                ->through(MiddlewareRegistryFacade::getOnceExecutedMiddleware($this->config->serviceName))
+                ->via('handle')
+                ->then(function (array $requests) {
+                    return $this->sendRequests($requests);
+                });
         } finally {
             $this->reset();
         }
     }
-
-    /**
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest[]
-     */
-    protected function handleMiddleware(): array
+    
+    private function sendRequests(array $requests): array
     {
-        $pipeline = new MiddlewarePipeline(Container::getInstance());
-        $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
-
-        $executedRequests = [];
-        foreach ($this->requests as $request) {
-            $request = $pipeline->send($request)
-                ->through($this->config->middleware)
-                ->via('handle')
-                ->then(static function (Request $request) {
-                    return ($request->getResult() instanceof Result)
-                        ? $request->getJsonRpcRequest()
-                        : null;
-                });
-
-            if ($request) {
-                $executedRequests[] = $request;
+        if (!\count($requests)) {
+            $this->reset();
+            
+            return [];
+        }
+        
+        $responses = $this->transportClient->get($requests, $this->config);
+        
+        foreach ($responses as $response) {
+            if (isset($this->requests[$response->id])) {
+                $this->requests[$response->id]->setJsonRpcResponse($response);
+                $this->results[$response->id] = $this->requests[$response->id]->getResult();
+            } else {
+                if (!empty($response->error)) {
+                    throw new ResponseException($response->error);
+                }
+                
+                throw new JsonRpcClientException(0, 'Unknown response');
             }
         }
-
-        return $pipeline->send($executedRequests)
-            ->through($this->config->onceExecutedMiddleware)
-            ->via('handle')
-            ->then(static function (array $requests) {
-                return $requests;
-            });
+        
+        return array_values(
+            array_map(static function (Result $item) {
+                return $item->get();
+            }, $this->results)
+        );
     }
-
+    
     protected function reset(): void
     {
         $this->executeImmediately = true;
