@@ -117,10 +117,18 @@ class DefaultQueryPreparer implements QueryPreparer
         }
         $arguments = $method->getArguments();
 
-        for ($i = 0, $iMax = \count($params); $i < $iMax; $i++) {
-            if (isset($arguments[$i])) {
-                $this->checkType($params[$i], $arguments[$i], $methodName);
-                $inputArguments[$arguments[$i]['name']] = $params[$i];
+        foreach ($params as $paramName => $paramValue) {
+            if (is_int($paramName)) {
+                if (isset($arguments[$paramName])) {
+                    $this->checkType($paramValue, $arguments[$paramName], $methodName);
+                    $inputArguments[$arguments[$paramName]['name']] = $paramValue;
+                }
+            } else {
+                $key = array_search($paramName, array_column($arguments, 'name'), true);
+                if ($key !== false) {
+                    $this->checkType($paramValue, $arguments[$key], $methodName);
+                    $inputArguments[$arguments[$key]['name']] = $paramValue;
+                }
             }
         }
 
