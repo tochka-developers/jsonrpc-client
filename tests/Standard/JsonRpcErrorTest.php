@@ -10,13 +10,13 @@ class JsonRpcErrorTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Standard\JsonRpcError::__construct
      */
-    public function testConstructFull(): void
+    public function test_construct_full(): void
     {
         $data = (object) [
-            'code'    => 123,
+            'code' => 123,
             'message' => 'Test message',
-            'data'    => (object) [
-                'foo'   => 'bar',
+            'data' => (object) [
+                'foo' => 'bar',
                 'hello' => 'world',
             ],
         ];
@@ -30,10 +30,10 @@ class JsonRpcErrorTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Standard\JsonRpcError::__construct
      */
-    public function testConstructDefault(): void
+    public function test_construct_default(): void
     {
         $data = (object) [
-            'code'    => 123,
+            'code' => 123,
             'message' => 'Test message',
         ];
         $instance = new JsonRpcError($data);

@@ -10,12 +10,9 @@ use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 class AuthTokenMiddleware implements OnceExecutedMiddleware
 {
     /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param string           $value
-     * @param string           $name
-     *
+     * @param  JsonRpcRequest[]  $requests
+     * @param  string  $value
+     * @param  string  $name
      * @return mixed
      */
     public function handle(
@@ -25,7 +22,7 @@ class AuthTokenMiddleware implements OnceExecutedMiddleware
         $value,
         $name = 'X-Access-Key'
     ) {
-        if (!$client instanceof HttpClient) {
+        if (! $client instanceof HttpClient) {
             return $next($requests);
         }
 

@@ -15,19 +15,18 @@ use Tochka\JsonRpcClient\Standard\JsonRpcResponse;
 class HttpClient implements TransportClient
 {
     protected $client;
+
     protected $options;
 
     public function __construct($options = [])
     {
         $this->options = $options;
-        $this->client = new Client();
+        $this->client = new Client;
     }
 
     /**
      * Устанавливает параметр клиента
      *
-     * @param $name
-     * @param $value
      *
      * @codeCoverageIgnore
      */
@@ -39,7 +38,6 @@ class HttpClient implements TransportClient
     /**
      * Возвращает все параметры клиента
      *
-     * @return array
      * @codeCoverageIgnore
      */
     public function getOptions(): array
@@ -50,9 +48,9 @@ class HttpClient implements TransportClient
     /**
      * Возвращает значение параметра клиента
      *
-     * @param $name
      *
      * @return mixed
+     *
      * @codeCoverageIgnore
      */
     public function getOption($name)
@@ -63,8 +61,6 @@ class HttpClient implements TransportClient
     /**
      * Устанавливает заголовок
      *
-     * @param $name
-     * @param $value
      *
      * @codeCoverageIgnore
      */
@@ -76,9 +72,9 @@ class HttpClient implements TransportClient
     /**
      * Возврашает значение заголовка
      *
-     * @param $name
      *
      * @return mixed
+     *
      * @codeCoverageIgnore
      */
     public function getHeader($name)
@@ -89,7 +85,6 @@ class HttpClient implements TransportClient
     /**
      * Возвращает все установленные заголовки
      *
-     * @return array
      * @codeCoverageIgnore
      */
     public function getHeaders(): array
@@ -100,7 +95,6 @@ class HttpClient implements TransportClient
     /**
      * Устанавливает содержимое запроса
      *
-     * @param array $body
      *
      * @codeCoverageIgnore
      */
@@ -113,6 +107,7 @@ class HttpClient implements TransportClient
      * Возвращает содержимое запроса
      *
      * @return mixed
+     *
      * @codeCoverageIgnore
      */
     public function getBody()
@@ -123,10 +118,9 @@ class HttpClient implements TransportClient
     /**
      * Выполняет запрос
      *
-     * @param JsonRpcRequest[] $requests
-     * @param ClientConfig     $config
-     *
+     * @param  JsonRpcRequest[]  $requests
      * @return \Tochka\JsonRpcClient\Standard\JsonRpcResponse[]
+     *
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     public function get(array $requests, ClientConfig $config): array
@@ -149,7 +143,7 @@ class HttpClient implements TransportClient
             throw new JsonRpcClientException(JsonRpcClientException::CODE_UNKNOWN_REQUEST_ERROR, null, $e);
         }
 
-        if (!\is_array($responses)) {
+        if (! \is_array($responses)) {
             $responses = [$responses];
         }
 

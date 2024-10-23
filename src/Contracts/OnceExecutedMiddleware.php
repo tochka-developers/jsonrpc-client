@@ -2,7 +2,4 @@
 
 namespace Tochka\JsonRpcClient\Contracts;
 
-interface OnceExecutedMiddleware
-{
-
-}
+interface OnceExecutedMiddleware {}

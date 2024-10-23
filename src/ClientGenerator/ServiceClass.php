@@ -22,7 +22,7 @@ class ServiceClass extends AbstractClass
         $this->makeCurrentClasses($this->method->objects, true);
 
         // описание для метода
-        if (!empty($this->method->description)) {
+        if (! empty($this->method->description)) {
             $source[] = preg_replace("#\n#iu", "\n *   ", $this->method->description);
         }
 
@@ -31,12 +31,12 @@ class ServiceClass extends AbstractClass
         foreach ($this->method->parameters as $parameter) {
             [$name, $type, $default] = $this->getParameterInfo($parameter, true);
 
-            $parameters[] = ($type !== null ? $type . ' ' : '') . '$' . $name . ($default !== null ? ' = ' . $default : '');
+            $parameters[] = ($type !== null ? $type.' ' : '').'$'.$name.($default !== null ? ' = '.$default : '');
         }
         $parameters = implode(', ', $parameters);
 
         $return = 'mixed';
-        if (!empty($this->method->returnParameters)) {
+        if (! empty($this->method->returnParameters)) {
             foreach ($this->method->returnParameters as $parameter) {
                 if ($parameter->is_root) {
                     [, $type] = $this->getReturnInfo($parameter, true);
@@ -44,7 +44,7 @@ class ServiceClass extends AbstractClass
                     break;
                 }
             }
-        } elseif (!empty($this->method->return)) {
+        } elseif (! empty($this->method->return)) {
             $return = implode('|', $this->method->return->types);
         }
         $return = $return ?: 'mixed';

@@ -11,12 +11,12 @@ class JsonRpcResponseTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Standard\JsonRpcResponse::__construct
      */
-    public function testConstructResult(): void
+    public function test_construct_result(): void
     {
         $data = (object) [
             'jsonrpc' => '2.0',
-            'id'      => 123,
-            'result'  => 'SomeResult',
+            'id' => 123,
+            'result' => 'SomeResult',
         ];
 
         $instance = new JsonRpcResponse($data);
@@ -29,13 +29,13 @@ class JsonRpcResponseTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Standard\JsonRpcResponse::__construct
      */
-    public function testConstructError(): void
+    public function test_construct_error(): void
     {
         $data = (object) [
             'jsonrpc' => '2.0',
-            'id'      => 123,
-            'error'   => (object) [
-                'code'    => 123,
+            'id' => 123,
+            'error' => (object) [
+                'code' => 123,
                 'message' => 'Some message',
             ],
         ];

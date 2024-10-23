@@ -7,10 +7,9 @@ trait ReflectionTrait
     /**
      * Получить приватную или протектную проперти
      *
-     * @param        $obj
-     * @param string $attribute
      *
      * @return mixed
+     *
      * @throws \ReflectionException
      */
     public function getProperty($obj, string $attribute)
@@ -23,12 +22,8 @@ trait ReflectionTrait
     }
 
     /**
-     *
      * Установить приватную или протектную проперти
      *
-     * @param        $obj
-     * @param string $attribute
-     * @param        $value
      *
      * @throws \ReflectionException
      */
@@ -43,11 +38,9 @@ trait ReflectionTrait
     /**
      * Вызвать приватаный или протектед метод
      *
-     * @param        $obj
-     * @param string $method
-     * @param array  $attributes
      *
      * @return mixed
+     *
      * @throws \ReflectionException
      */
     public function callMethod($obj, string $method, array $attributes = [])
@@ -62,17 +55,16 @@ trait ReflectionTrait
     /**
      * Вызвать приватаный или протектед метод статический метод
      *
-     * @param       $class
-     * @param       $method
-     * @param array $attributes
      *
      * @return mixed
+     *
      * @throws \ReflectionException
      */
     public function callStaticMethod($class, $method, array $attributes = [])
     {
         $reflectionMethod = new \ReflectionMethod($class, $method);
         $reflectionMethod->setAccessible(true);
+
         return $reflectionMethod->invokeArgs(null, $attributes);
     }
 }

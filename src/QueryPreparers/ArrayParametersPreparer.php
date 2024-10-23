@@ -8,13 +8,6 @@ use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 
 class ArrayParametersPreparer implements QueryPreparer
 {
-    /**
-     * @param string                             $method
-     * @param array                              $params
-     * @param \Tochka\JsonRpcClient\ClientConfig $config
-     *
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest
-     */
     public function prepare(string $method, array $params, ClientConfig $config): JsonRpcRequest
     {
         $id = uniqid($config->clientName, true);

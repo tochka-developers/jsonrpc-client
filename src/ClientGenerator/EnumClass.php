@@ -11,8 +11,11 @@ class EnumClass extends AbstractClass implements Stub
     protected $parameters;
 
     public $classDescription;
+
     public $type;
+
     public $values;
+
     public $constants;
 
     public function __construct(AbstractClass $parentClass, string $className, string $classNamespace, array $values, string $type, bool $alias = false)
@@ -20,7 +23,7 @@ class EnumClass extends AbstractClass implements Stub
         parent::__construct($parentClass, $className, $classNamespace);
 
         if ($alias) {
-            $this->aliasName = $parentClass->className . '_' . $className;
+            $this->aliasName = $parentClass->className.'_'.$className;
         }
         $this->values = $values;
         $this->type = $type;
@@ -37,11 +40,11 @@ class EnumClass extends AbstractClass implements Stub
 
     public static function fromProperty(AbstractClass $baseClass, SmdParameter $parameter, bool $alias = false)
     {
-        $className = studly_case($parameter->name) . 'Enum';
+        $className = studly_case($parameter->name).'Enum';
 
         $type = implode('|', $parameter->types);
 
-        $instance = new self($baseClass, $className, $baseClass->getFullClassName(), (array)$parameter->typeVariants, $type, $alias);
+        $instance = new self($baseClass, $className, $baseClass->getFullClassName(), (array) $parameter->typeVariants, $type, $alias);
 
         return $instance;
     }
@@ -88,17 +91,17 @@ php;
     protected function getConstants()
     {
         return implode("\n", array_map(function ($value) {
-            $phpDoc = '    /** @var ' . $this->type . (isset($value['description']) ? ' ' . $value['description'] : '') . ' */';
-            $constant = '    public const ' . $value['name'] . ' = ' . var_export($value['value'], true) . ';';
+            $phpDoc = '    /** @var '.$this->type.(isset($value['description']) ? ' '.$value['description'] : '').' */';
+            $constant = '    public const '.$value['name'].' = '.var_export($value['value'], true).';';
 
-            return $phpDoc . "\n" . $constant;
+            return $phpDoc."\n".$constant;
         }, $this->constants));
     }
 
     protected function addConstant($value, $description = null)
     {
         $property = [
-            'name'  => strtoupper(snake_case($value)),
+            'name' => strtoupper(snake_case($value)),
             'value' => $value,
         ];
 

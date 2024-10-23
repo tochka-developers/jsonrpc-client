@@ -10,12 +10,10 @@ use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
 class MiddlewarePipeline extends Pipeline
 {
     protected $clientConfig;
+
     protected $transportClient;
 
     /**
-     * @param \Tochka\JsonRpcClient\ClientConfig              $config
-     * @param \Tochka\JsonRpcClient\Contracts\TransportClient $client
-     *
      * @codeCoverageIgnore
      */
     public function setAdditionalDIInstances(ClientConfig $config, TransportClient $client): void
@@ -26,8 +24,6 @@ class MiddlewarePipeline extends Pipeline
 
     /**
      * Get a Closure that represents a slice of the application onion.
-     *
-     * @return \Closure
      */
     protected function carry(): \Closure
     {
@@ -40,7 +36,7 @@ class MiddlewarePipeline extends Pipeline
                     return $pipe($passable, $stack);
                 }
 
-                if (!is_object($pipe)) {
+                if (! is_object($pipe)) {
                     if (is_string($pipe)) {
                         [$name, $parameters] = $this->parsePipeString($pipe);
                     } else {
@@ -70,9 +66,7 @@ class MiddlewarePipeline extends Pipeline
     /**
      * Parse full pipe string to get name and parameters.
      *
-     * @param array $pipe
      *
-     * @return array
      * @throws \ReflectionException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
@@ -91,17 +85,19 @@ class MiddlewarePipeline extends Pipeline
 
             if (isset($parameters[$reflectionParamName])) {
                 $values[] = $parameters[$reflectionParamName];
+
                 continue;
             }
 
             $type = $reflectionParameters[$i]->getType();
             if ($type === null || $type->isBuiltin()) {
-                if (!$reflectionParameters[$i]->isOptional()) {
-                    throw new JsonRpcClientException(0, 'Error while handling middleware: unknown parameter ' . $reflectionParamName);
+                if (! $reflectionParameters[$i]->isOptional()) {
+                    throw new JsonRpcClientException(0, 'Error while handling middleware: unknown parameter '.$reflectionParamName);
                 }
 
                 // получим значение аргумента по умолчанию
                 $values[] = $reflectionParameters[$i]->getDefaultValue();
+
                 continue;
             }
 

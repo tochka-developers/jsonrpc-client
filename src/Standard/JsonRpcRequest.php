@@ -7,15 +7,15 @@ use Illuminate\Contracts\Support\Arrayable;
 class JsonRpcRequest implements Arrayable
 {
     public $method;
+
     public $params;
+
     public $id;
 
     /**
      * JsonRpcRequest constructor.
      *
-     * @param string     $method
-     * @param array      $params
-     * @param string|int $id
+     * @param  string|int  $id
      *
      * @codeCoverageIgnore
      */
@@ -30,8 +30,8 @@ class JsonRpcRequest implements Arrayable
     {
         $result = [
             'jsonrpc' => '2.0',
-            'method'  => $this->method,
-            'params'  => $this->params,
+            'method' => $this->method,
+            'params' => $this->params,
         ];
 
         if ($this->id !== null) {

@@ -2,11 +2,11 @@
 
 return [
     // Имя клиента. Используется в качестве префикса к ID запросов
-    'clientName'  => 'default',
+    'clientName' => 'default',
 
     // Соединение по умолчанию
-    'default'     => 'api',
-    
+    'default' => 'api',
+
     // Таймаут клиентов по умолчанию
     'defaultTimeout' => 60,
 
@@ -15,24 +15,24 @@ return [
         // Наименование соединения
         'api' => [
             // URL-адрес JsonRpc-сервера
-            'url'             => 'https://api.jsonrpc.com/v1/jsonrpc',
+            'url' => 'https://api.jsonrpc.com/v1/jsonrpc',
             // Имя прокси-класса для данного соединения
-            'clientClass'     => '\\App\\Api\\Client',
+            'clientClass' => '\\App\\Api\\Client',
             // Генерация расширенного описания АПИ в виде классов-хелперов для входных и выходных параметров методов
-            'extendedStubs'   => false,
-            'middleware'      => [
-//                \Tochka\JsonRpcClient\Middleware\AdditionalHeadersMiddleware::class => [
-//                    'headerName1' => 'headerValue',
-//                    'headerName2' => ['value1', 'value2',], // To include multiple headers with the same name
-//                ],
+            'extendedStubs' => false,
+            'middleware' => [
+                //                \Tochka\JsonRpcClient\Middleware\AdditionalHeadersMiddleware::class => [
+                //                    'headerName1' => 'headerValue',
+                //                    'headerName2' => ['value1', 'value2',], // To include multiple headers with the same name
+                //                ],
 
                 \Tochka\JsonRpcClient\Middleware\AuthTokenMiddleware::class => [
-                    'name'  => 'X-Access-Key',
+                    'name' => 'X-Access-Key',
                     'value' => 'TokenValue',
                 ],
 
                 \Tochka\JsonRpcClient\Middleware\AuthBasicMiddleware::class => [
-                    'scheme'   => 'safe',
+                    'scheme' => 'safe',
                     'username' => 'username',
                     'password' => 'password',
                 ],

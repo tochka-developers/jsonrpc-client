@@ -9,27 +9,22 @@ use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 
 /**
  * A middleware allowing for inclusion of additional http headers into the request.
- *
- * @package App\Api\Middleware
  */
 class AdditionalHeadersMiddleware implements OnceExecutedMiddleware
 {
     /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param array            $headers
-     *
+     * @param  JsonRpcRequest[]  $requests
+     * @param  array  $headers
      * @return mixed
      */
     public function handle(array $requests, \Closure $next, TransportClient $client, $headers = [])
     {
-        if (!$client instanceof HttpClient) {
+        if (! $client instanceof HttpClient) {
             return $next($requests);
         }
 
         foreach ($headers as $key => $value) {
-            if (!\is_array($value)) {
+            if (! \is_array($value)) {
                 $value = [$value];
             }
 

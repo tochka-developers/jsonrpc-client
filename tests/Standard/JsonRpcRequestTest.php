@@ -10,7 +10,7 @@ class JsonRpcRequestTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Standard\JsonRpcRequest::toArray
      */
-    public function testToArray(): void
+    public function test_to_array(): void
     {
         $params = ['foo' => 'bar', 'hello' => 'world'];
         $instance = new JsonRpcRequest('test', $params, 123);

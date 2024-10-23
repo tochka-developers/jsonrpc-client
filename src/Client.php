@@ -14,7 +14,6 @@ use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 /**
  * Class Client
  *
- * @package Tochka\JsonRpcClient
  * @method static static batch()
  * @method static static cache($minutes = -1)
  * @method static static with(string $name, $value)
@@ -25,41 +24,43 @@ use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 class Client
 {
     protected ClientConfig $config;
+
     protected bool $executeImmediately = true;
-    
+
     /** @var Request[] */
     protected array $requests = [];
+
     protected array $results = [];
-    
+
     protected array $additionalValues = [];
+
     protected QueryPreparer $queryPreparer;
+
     protected TransportClient $transportClient;
-    
+
     public function __construct(ClientConfig $config, QueryPreparer $queryPreparer, TransportClient $client)
     {
         $this->reset();
-        
+
         $this->config = $config;
         $this->queryPreparer = $queryPreparer;
         $this->transportClient = $client;
     }
-    
+
     /**
-     * @param $method
-     * @param $params
-     *
      * @return mixed
+     *
      * @throws \Exception
      */
     public function __call($method, $params)
     {
-        if (method_exists($this, '_' . $method)) {
-            return $this->{'_' . $method}(...$params);
+        if (method_exists($this, '_'.$method)) {
+            return $this->{'_'.$method}(...$params);
         }
-        
+
         return $this->_call($method, $params);
     }
-    
+
     /**
      * Помечает экземпляр клиента как массив вызовов
      *
@@ -69,57 +70,48 @@ class Client
     {
         $instanceBatch = new self($this->config, $this->queryPreparer, $this->transportClient);
         $instanceBatch->executeImmediately = false;
-        
+
         return $instanceBatch;
     }
-    
+
     /**
-     * @param string $name
-     * @param mixed $value
-     *
-     * @return \Tochka\JsonRpcClient\Client
+     * @param  mixed  $value
      */
     protected function _with(string $name, $value): self
     {
         $this->additionalValues[$name] = $value;
-        
+
         return $this;
     }
-    
-    /**
-     * @param array $values
-     *
-     * @return \Tochka\JsonRpcClient\Client
-     */
+
     protected function _withValues(array $values): self
     {
         $this->additionalValues = array_merge($this->additionalValues, $values);
-        
+
         return $this;
     }
-    
+
     /**
      * Помечает вызываемый метод кешируемым
      *
-     * @param int $minutes
-     *
+     * @param  int  $minutes
      * @return $this
      */
     protected function _cache($minutes = -1): self
     {
         $this->additionalValues['cache'] = $minutes;
-        
+
         return $this;
     }
-    
+
     /** @noinspection MagicMethodsValidityInspection */
     /**
      * Выполняет удаленный вызов (либо добавляет его в массив)
      *
-     * @param string $method
-     * @param array $params
-     *
+     * @param  string  $method
+     * @param  array  $params
      * @return mixed
+     *
      * @throws \Exception
      */
     protected function _call($method, $params)
@@ -127,43 +119,40 @@ class Client
         $jsonRpcRequest = $this->queryPreparer->prepare($method, $params, $this->config);
         $request = new Request($jsonRpcRequest);
         $request->setAdditional($this->additionalValues);
-        
+
         $this->additionalValues = [];
-        
+
         $pipeline = new MiddlewarePipeline(Container::getInstance());
         $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
-        
-        
+
         $request = $pipeline->send($request)
             ->through(MiddlewareRegistryFacade::getMiddleware($this->config->serviceName))
             ->via('handle')
             ->thenReturn();
-        
-        
+
         $this->requests[$request->getId()] = $request;
         $this->results[$request->getId()] = $this->requests[$request->getId()]->getResult();
-        
+
         if ($this->executeImmediately) {
             $result = $this->_execute();
             if (\count($result) > 0) {
                 return $result[0];
             }
         }
-        
+
         return $this->results[$request->getId()];
     }
-    
+
     /**
      * Выполняет запрос всех вызовов
      *
-     * @return array
      * @throws \Exception
      */
     protected function _execute(): array
     {
         $pipeline = new MiddlewarePipeline(Container::getInstance());
         $pipeline->setAdditionalDIInstances($this->config, $this->transportClient);
-        
+
         $jsonRpcRequests = array_values(
             array_filter(
                 array_map(function (Request $request): ?JsonRpcRequest {
@@ -173,7 +162,7 @@ class Client
                 }, $this->requests)
             )
         );
-        
+
         try {
             return $pipeline->send($jsonRpcRequests)
                 ->through(MiddlewareRegistryFacade::getOnceExecutedMiddleware($this->config->serviceName))
@@ -185,37 +174,37 @@ class Client
             $this->reset();
         }
     }
-    
+
     private function sendRequests(array $requests): array
     {
-        if (!\count($requests)) {
+        if (! \count($requests)) {
             $this->reset();
-            
+
             return [];
         }
-        
+
         $responses = $this->transportClient->get($requests, $this->config);
-        
+
         foreach ($responses as $response) {
             if (isset($this->requests[$response->id])) {
                 $this->requests[$response->id]->setJsonRpcResponse($response);
                 $this->results[$response->id] = $this->requests[$response->id]->getResult();
             } else {
-                if (!empty($response->error)) {
+                if (! empty($response->error)) {
                     throw new ResponseException($response->error);
                 }
-                
+
                 throw new JsonRpcClientException(0, 'Unknown response');
             }
         }
-        
+
         return array_values(
             array_map(static function (Result $item) {
                 return $item->get();
             }, $this->results)
         );
     }
-    
+
     protected function reset(): void
     {
         $this->executeImmediately = true;

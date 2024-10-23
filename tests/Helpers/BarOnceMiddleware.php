@@ -4,7 +4,4 @@ namespace Tochka\JsonRpcClient\Tests\Helpers;
 
 use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
 
-class BarOnceMiddleware implements OnceExecutedMiddleware
-{
-
-}
+class BarOnceMiddleware implements OnceExecutedMiddleware {}

@@ -8,14 +8,15 @@ use Tochka\JsonRpcClient\Contracts\OnceExecutedMiddleware;
 class MiddlewareRegistry implements MiddlewareRegistryInterface
 {
     private array $middleware = [];
+
     private array $onceExecutedMiddleware = [];
-    
+
     public function setMiddleware(string $clientName, array $middleware, array $onceExecutedMiddleware): void
     {
         $this->middleware[$clientName] = $middleware;
         $this->onceExecutedMiddleware[$clientName] = $onceExecutedMiddleware;
     }
-    
+
     public function append(array $middleware, ?string $clientName = null): void
     {
         if ($clientName !== null) {
@@ -30,7 +31,7 @@ class MiddlewareRegistry implements MiddlewareRegistryInterface
             }
         }
     }
-    
+
     public function prepend(array $middleware, ?string $clientName = null): void
     {
         if ($clientName !== null) {
@@ -45,20 +46,21 @@ class MiddlewareRegistry implements MiddlewareRegistryInterface
             }
         }
     }
-    
+
     public function getMiddleware(string $clientName): array
     {
         return $this->middleware[$clientName] ?? [];
     }
-    
+
     public function getOnceExecutedMiddleware(string $clientName): array
     {
         return $this->onceExecutedMiddleware[$clientName] ?? [];
     }
-    
+
     private function isOnceExecuted(array $middleware): bool
     {
         $implements = class_implements($middleware[0]);
+
         return $implements && \in_array(OnceExecutedMiddleware::class, $implements, true);
     }
 }

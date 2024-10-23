@@ -6,6 +6,6 @@ class BaseObjectClass implements ParameterValue
 {
     public function getValue()
     {
-        return (object)$this;
+        return (object) $this;
     }
 }

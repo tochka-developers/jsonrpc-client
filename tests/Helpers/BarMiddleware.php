@@ -2,7 +2,4 @@
 
 namespace Tochka\JsonRpcClient\Tests\Helpers;
 
-class BarMiddleware
-{
-
-}
+class BarMiddleware {}

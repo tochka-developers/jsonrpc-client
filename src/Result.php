@@ -8,6 +8,7 @@ class Result
 
     /**
      * @return mixed
+     *
      * @codeCoverageIgnore
      */
     public function get()
@@ -16,8 +17,6 @@ class Result
     }
 
     /**
-     * @param $value
-     *
      * @codeCoverageIgnore
      */
     public function setResult($value): void

@@ -1,4 +1,4 @@
-# JSON-RPC Client (Laravel 5.6, Lumen 5.6)
+# JSON-RPC Client (Laravel >9.0)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=alert_status)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=bugs)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=tochka-developers_jsonrpc-client&metric=code_smells)](https://sonarcloud.io/dashboard?id=tochka-developers_jsonrpc)

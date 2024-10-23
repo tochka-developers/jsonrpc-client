@@ -11,13 +11,10 @@ use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 class AuthBasicMiddleware implements OnceExecutedMiddleware
 {
     /**
-     * @param JsonRpcRequest[] $requests
-     * @param \Closure         $next
-     * @param TransportClient  $client
-     * @param string           $username
-     * @param string           $password
-     * @param string           $scheme
-     *
+     * @param  JsonRpcRequest[]  $requests
+     * @param  string  $username
+     * @param  string  $password
+     * @param  string  $scheme
      * @return mixed
      */
     public function handle(
@@ -28,7 +25,7 @@ class AuthBasicMiddleware implements OnceExecutedMiddleware
         $password = '',
         $scheme = 'basic'
     ) {
-        if (!$client instanceof HttpClient) {
+        if (! $client instanceof HttpClient) {
             return $next($requests);
         }
 

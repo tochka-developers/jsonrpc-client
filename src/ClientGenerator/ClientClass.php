@@ -7,7 +7,6 @@ use Tochka\JsonRpcSmd\SmdDescription;
 
 /**
  * Class ClientClass
- * @package Tochka\JsonRpcClient\ClientGenerator
  */
 class ClientClass extends AbstractClass implements Stub
 {
@@ -15,8 +14,11 @@ class ClientClass extends AbstractClass implements Stub
     protected $smd;
 
     protected $classDescription;
+
     protected $methods;
+
     protected $serviceName;
+
     protected $methodSource;
 
     public function __construct(SmdDescription $smd, ClientConfig $config, string $className, string $classNamespace)
@@ -88,11 +90,11 @@ php;
             if (isset($method->group)) {
                 if ($oldGroup !== $method->group) {
                     $source[] = '';
-                    if (!empty($method->groupName)) {
+                    if (! empty($method->groupName)) {
                         $ln = mb_strlen($method->groupName);
                         $delimiter = str_pad('', $ln + 20, '=');
                         $source[] = $delimiter;
-                        $source[] = str_pad('', 10) . $method->groupName;
+                        $source[] = str_pad('', 10).$method->groupName;
                         $source[] = $delimiter;
                     }
                 }

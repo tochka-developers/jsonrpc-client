@@ -9,22 +9,26 @@ use Tochka\JsonRpcClient\QueryPreparers\DefaultQueryPreparer;
 class ClientConfig
 {
     public $serviceName = 'default';
+
     public $clientName = 'default';
 
     public $url;
+
     public $clientClass;
+
     public $extendedStubs = false;
+
     public $middleware = [];
+
     public $onceExecutedMiddleware = [];
+
     public $queryPreparer;
+
     public $options = [];
 
     /**
      * ClientConfig constructor.
      *
-     * @param string $clientName
-     * @param string $serviceName
-     * @param array  $clientConfig
      *
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
@@ -33,8 +37,8 @@ class ClientConfig
         $this->clientName = $clientName;
         $this->serviceName = $serviceName;
 
-        if (!isset($clientConfig['url'], $clientConfig['clientClass'])) {
-            throw new JsonRpcClientException(0, 'Connection configuration mismatch for: ' . $serviceName);
+        if (! isset($clientConfig['url'], $clientConfig['clientClass'])) {
+            throw new JsonRpcClientException(0, 'Connection configuration mismatch for: '.$serviceName);
         }
 
         $this->url = $clientConfig['url'];
@@ -49,9 +53,6 @@ class ClientConfig
     }
 
     /**
-     * @param $middleware
-     *
-     * @return array
      * @codeCoverageIgnore
      */
     protected function parseMiddlewareConfiguration($middleware): array
@@ -68,9 +69,6 @@ class ClientConfig
         return $result;
     }
 
-    /**
-     * @param array $middleware
-     */
     protected function sortMiddleware(array $middleware): void
     {
         foreach ($middleware as $m) {

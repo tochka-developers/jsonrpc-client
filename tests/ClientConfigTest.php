@@ -16,7 +16,7 @@ class ClientConfigTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\ClientConfig::__construct
      */
-    public function testConstructConfigurationMismatch(): void
+    public function test_construct_configuration_mismatch(): void
     {
         $this->expectException(JsonRpcClientException::class);
         new ClientConfig('clientName', 'serviceName', []);
@@ -25,26 +25,26 @@ class ClientConfigTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\ClientConfig::__construct
      */
-    public function testConstructFull(): void
+    public function test_construct_full(): void
     {
         $data = [
-            'url'           => 'http://test.com/jsonrpc',
-            'clientClass'   => 'MyStubClass',
-            'middleware'    => [
+            'url' => 'http://test.com/jsonrpc',
+            'clientClass' => 'MyStubClass',
+            'middleware' => [
                 FooMiddleware::class,
                 FooOnceMiddleware::class => [
-                    'foo'   => 'bar',
+                    'foo' => 'bar',
                     'hello' => 'world',
                 ],
-                BarMiddleware::class     => [
-                    'foo'   => 'bar',
+                BarMiddleware::class => [
+                    'foo' => 'bar',
                     'hello' => 'world',
                 ],
                 BarOnceMiddleware::class,
             ],
             'queryPreparer' => 'TestQueryPreparer',
             'extendedStubs' => true,
-            'options'       => ['timeout' => 666],
+            'options' => ['timeout' => 666],
         ];
 
         $middlewareConfigured = [
@@ -52,7 +52,7 @@ class ClientConfigTest extends TestCase
             [
                 BarMiddleware::class,
                 [
-                    'foo'   => 'bar',
+                    'foo' => 'bar',
                     'hello' => 'world',
                 ],
             ],
@@ -62,7 +62,7 @@ class ClientConfigTest extends TestCase
             [
                 FooOnceMiddleware::class,
                 [
-                    'foo'   => 'bar',
+                    'foo' => 'bar',
                     'hello' => 'world',
                 ],
             ],
@@ -85,10 +85,10 @@ class ClientConfigTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\ClientConfig::__construct
      */
-    public function testConstructDefault(): void
+    public function test_construct_default(): void
     {
         $data = [
-            'url'         => 'http://test.com/jsonrpc',
+            'url' => 'http://test.com/jsonrpc',
             'clientClass' => 'MyStubClass',
         ];
 

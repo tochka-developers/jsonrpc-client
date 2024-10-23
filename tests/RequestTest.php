@@ -1,11 +1,13 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
+
+/** @noinspection PhpUnhandledExceptionInspection */
 
 namespace Tochka\JsonRpcClient\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Tochka\JsonRpcClient\Result;
 use Tochka\JsonRpcClient\Exceptions\ResponseException;
 use Tochka\JsonRpcClient\Request;
+use Tochka\JsonRpcClient\Result;
 use Tochka\JsonRpcClient\Standard\JsonRpcRequest;
 use Tochka\JsonRpcClient\Standard\JsonRpcResponse;
 
@@ -14,7 +16,7 @@ class RequestTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Request::getAdditional
      */
-    public function testGetAdditional(): void
+    public function test_get_additional(): void
     {
         $jsonRpcRequest = new JsonRpcRequest('test', []);
         $instance = new Request($jsonRpcRequest);
@@ -35,13 +37,13 @@ class RequestTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Request::setJsonRpcResponse
      */
-    public function testSetJsonRpcResponse(): void
+    public function test_set_json_rpc_response(): void
     {
         $jsonRpcRequest = new JsonRpcRequest('test', []);
         $responseData = (object) [
             'jsonrpc' => '2.0',
-            'result'  => true,
-            'id'      => '1',
+            'result' => true,
+            'id' => '1',
         ];
         $jsonRpcResponse = new JsonRpcResponse($responseData);
 
@@ -60,7 +62,7 @@ class RequestTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Request::parseResult
      */
-    public function testParseResultSuccess(): void
+    public function test_parse_result_success(): void
     {
         $jsonRpcRequest = new JsonRpcRequest('test', []);
         $instance = new Request($jsonRpcRequest);
@@ -75,7 +77,7 @@ class RequestTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Request::parseResult
      */
-    public function testParseResultError(): void
+    public function test_parse_result_error(): void
     {
         $jsonRpcRequest = new JsonRpcRequest('test', []);
         $instance = new Request($jsonRpcRequest);
@@ -92,7 +94,7 @@ class RequestTest extends TestCase
     /**
      * @covers \Tochka\JsonRpcClient\Request::__construct
      */
-    public function testConstruct(): void
+    public function test_construct(): void
     {
         $jsonRpcRequest = new JsonRpcRequest('test', []);
         $instance = new Request($jsonRpcRequest);
@@ -112,8 +114,8 @@ class RequestTest extends TestCase
     {
         $responseData = (object) [
             'jsonrpc' => '2.0',
-            'result'  => $result,
-            'id'      => $id,
+            'result' => $result,
+            'id' => $id,
         ];
 
         return new JsonRpcResponse($responseData);
@@ -123,7 +125,7 @@ class RequestTest extends TestCase
     {
         $error = (object) [
             'message' => $message,
-            'code'    => $code,
+            'code' => $code,
         ];
 
         if ($data !== null) {
@@ -132,8 +134,8 @@ class RequestTest extends TestCase
 
         $responseData = (object) [
             'jsonrpc' => '2.0',
-            'error'   => $error,
-            'id'      => $id,
+            'error' => $error,
+            'id' => $id,
         ];
 
         return new JsonRpcResponse($responseData);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit backupGlobals="false"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         backupGlobals="false"
          backupStaticAttributes="false"
          bootstrap="vendor/autoload.php"
          colors="true"
@@ -7,25 +8,26 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false">
-    <testsuites>
-        <testsuite name="Unit">
-            <directory suffix="Test.php">./tests</directory>
-        </testsuite>
-    </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src</directory>
-            <exclude>
-                <directory suffix=".php">./src/Providers</directory>
-                <directory suffix=".php">./src/Exceptions</directory>
-                <directory suffix=".php">./src/Contracts</directory>
-                <directory suffix=".php">./src/ClientGenerator</directory>
-                <directory suffix=".php">./src/DocBlock</directory>
-                <directory suffix=".php">./src/Types</directory>
-                <directory suffix=".php">./src/Console</directory>
-                <file>./src/JsonRpcClientServiceProvider.php</file>
-            </exclude>
-        </whitelist>
-    </filter>
+         stopOnFailure="false"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">./src</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">./src/Providers</directory>
+      <directory suffix=".php">./src/Exceptions</directory>
+      <directory suffix=".php">./src/Contracts</directory>
+      <directory suffix=".php">./src/ClientGenerator</directory>
+      <directory suffix=".php">./src/DocBlock</directory>
+      <directory suffix=".php">./src/Types</directory>
+      <directory suffix=".php">./src/Console</directory>
+      <file>./src/JsonRpcClientServiceProvider.php</file>
+    </exclude>
+  </coverage>
+  <testsuites>
+    <testsuite name="Unit">
+      <directory suffix="Test.php">./tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

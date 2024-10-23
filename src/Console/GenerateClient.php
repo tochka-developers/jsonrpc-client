@@ -1,4 +1,6 @@
-<?php /** @noinspection ClassOverridesFieldOfSuperClassInspection */
+<?php
+
+/** @noinspection ClassOverridesFieldOfSuperClassInspection */
 
 namespace Tochka\JsonRpcClient\Console;
 
@@ -30,13 +32,11 @@ class GenerateClient extends Command
     }
 
     /**
-     * @param string $connection
-     *
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     protected function generate(string $connection): void
     {
-        $this->info('Generate client class for connection: ' . $connection);
+        $this->info('Generate client class for connection: '.$connection);
 
         $services = config('jsonrpc-client.connections', []);
         $clientName = config('jsonrpc-client.clientName', []);

@@ -14,7 +14,7 @@
         "laravel"
     ],
     "require": {
-        "php": "^8.0|^8.1|^8.2|^8.3",
+        "php": "8.1.*|8.2.*|8.3.*",
         "ext-json": "*",
         "illuminate/log": "^9.0|^10.0|^11.0",
         "illuminate/cache": "^9.0|^10.0|^11.0",
@@ -32,13 +32,12 @@
         "psr/http-factory-implementation": "1.0"
     },
     "require-dev": {
-        "bensampo/laravel-enum": "^5.0",
+        "bensampo/laravel-enum": "^5.0|^6.0",
         "laravel/pint": "^1.4",
         "mockery/mockery": "^1.0",
         "php-http/mock-client": "^1.5",
-        "orchestra/testbench": "^7.1",
+        "orchestra/testbench": "^7.1|^8.0|^9.0",
         "phpunit/phpunit": "^9.6",
-        "roave/security-advisories": "dev-latest",
         "timacdonald/log-fake": "^2.0",
         "vimeo/psalm": "^5.6"
     },
@@ -62,7 +61,9 @@
     "scripts": {
         "lint": "php8.1 vendor/bin/pint --test",
         "lint-fix": "php8.1 vendor/bin/pint",
-        "analyze": "php8.1 vendor/bin/psalm --php-version=8.1 --no-cache"
+        "analyze": "php8.1 vendor/bin/psalm --php-version=8.1 --no-cache",
+        "pint": "vendor/bin/pint",
+        "psalm": "vendor/bin/psalm --output-format=phpstorm --no-cache"
     },
     "config": {
         "allow-plugins": {

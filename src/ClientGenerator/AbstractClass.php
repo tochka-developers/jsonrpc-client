@@ -9,12 +9,18 @@ use Tochka\JsonRpcSmd\SmdSimpleObject;
 abstract class AbstractClass
 {
     public $aliasName;
+
     public $className;
+
     public $classNamespace;
+
     public $extendedStubs = false;
+
     protected $uses = [];
+
     /** @var self[] */
     protected $subClasses = [];
+
     /** @var self */
     protected $parentClass;
 
@@ -32,12 +38,12 @@ abstract class AbstractClass
     protected function getUses(): string
     {
         return implode("\n", array_map(function ($value) {
-                if (isset($value['aliasName'])) {
-                    return 'use ' . $value['className'] . ' as ' . $value['aliasName'] . ';';
-                }
+            if (isset($value['aliasName'])) {
+                return 'use '.$value['className'].' as '.$value['aliasName'].';';
+            }
 
-                return 'use ' . $value['className'] . ';';
-            }, $this->uses)) . "\n";
+            return 'use '.$value['className'].';';
+        }, $this->uses))."\n";
     }
 
     public function addUse(AbstractClass $class): void
@@ -77,8 +83,7 @@ abstract class AbstractClass
     }
 
     /**
-     * @param SmdBaseObject[] $objects
-     * @param bool $withAlias
+     * @param  SmdBaseObject[]  $objects
      */
     protected function makeCurrentClasses(array $objects, bool $withAlias = false): void
     {
@@ -97,11 +102,11 @@ abstract class AbstractClass
         $this->subClasses[$class->getFullClassName()] = $class;
     }
 
-    public function getFullClassName(string $namespacePostfix = null): string
+    public function getFullClassName(?string $namespacePostfix = null): string
     {
-        $result = $this->classNamespace . '\\' . $this->className;
+        $result = $this->classNamespace.'\\'.$this->className;
         if ($namespacePostfix !== null) {
-            $result .= '\\' . $namespacePostfix;
+            $result .= '\\'.$namespacePostfix;
         }
 
         return $result;

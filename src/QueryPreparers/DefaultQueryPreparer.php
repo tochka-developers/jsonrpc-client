@@ -24,9 +24,6 @@ class DefaultQueryPreparer implements QueryPreparer
     protected $methods = [];
 
     /**
-     * @param \Tochka\JsonRpcClient\ClientConfig $config
-     *
-     * @return void
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     protected function mapMethods(ClientConfig $config): void
@@ -38,7 +35,7 @@ class DefaultQueryPreparer implements QueryPreparer
         try {
             $reflection = new \ReflectionClass($clientFacade);
         } catch (\ReflectionException $e) {
-            throw new JsonRpcClientException(0, 'Cannot parse proxy class DocBlock: ' . $e->getMessage());
+            throw new JsonRpcClientException(0, 'Cannot parse proxy class DocBlock: '.$e->getMessage());
         }
 
         $docs = $reflection->getDocComment();
@@ -52,10 +49,6 @@ class DefaultQueryPreparer implements QueryPreparer
     }
 
     /**
-     * @param        $value
-     * @param array  $argument
-     * @param string $method
-     *
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     protected function checkType($value, array $argument, string $method): void
@@ -68,7 +61,7 @@ class DefaultQueryPreparer implements QueryPreparer
                 $typesArray[] = $item;
             }
         } elseif ($type instanceof Nullable) {
-            $typesArray[] = new Null_();
+            $typesArray[] = new Null_;
             $typesArray[] = $type->getActualType();
         } else {
             $typesArray[] = $type;
@@ -90,18 +83,12 @@ class DefaultQueryPreparer implements QueryPreparer
             }
         }
 
-        $messageType = 'expected ' . (string) $type . ' got ' . gettype($value) . ' in method ' . $method;
+        $messageType = 'expected '.(string) $type.' got '.gettype($value).' in method '.$method;
         throw new JsonRpcClientException(0,
-            'Error while mapping jsonrpc client method parameter: ' . $argumentName . ', ' . $messageType);
+            'Error while mapping jsonrpc client method parameter: '.$argumentName.', '.$messageType);
     }
 
-
     /**
-     * @param string       $methodName
-     * @param array        $params
-     * @param ClientConfig $config
-     *
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest
      * @throws \Tochka\JsonRpcClient\Exceptions\JsonRpcClientException
      */
     public function prepare(string $methodName, array $params, ClientConfig $config): JsonRpcRequest
@@ -112,7 +99,7 @@ class DefaultQueryPreparer implements QueryPreparer
 
         $inputArguments = [];
         $method = $this->methods[$methodName] ?? null;
-        if (!$method) {
+        if (! $method) {
             throw new JsonRpcClientException(0, 'Method not found in proxy class');
         }
         $arguments = $method->getArguments();

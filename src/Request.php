@@ -10,21 +10,21 @@ class Request
 {
     /** @var \Tochka\JsonRpcClient\Standard\JsonRpcRequest */
     protected $jsonRpcRequest;
+
     /** @var \Tochka\JsonRpcClient\Standard\JsonRpcResponse */
     protected $jsonRpcResponse;
 
     protected $result;
+
     protected $additional = [];
 
     public function __construct(JsonRpcRequest $request)
     {
         $this->jsonRpcRequest = $request;
-        $this->result = new Result();
+        $this->result = new Result;
     }
 
     /**
-     * @param array $values
-     *
      * @codeCoverageIgnore
      */
     public function setAdditional(array $values): void
@@ -33,9 +33,7 @@ class Request
     }
 
     /**
-     * @param      $key
-     * @param null $default
-     *
+     * @param  null  $default
      * @return mixed|null
      */
     public function getAdditional($key, $default = null)
@@ -44,7 +42,6 @@ class Request
     }
 
     /**
-     * @return Result
      * @codeCoverageIgnore
      */
     public function getResult(): Result
@@ -53,7 +50,6 @@ class Request
     }
 
     /**
-     * @return string
      * @codeCoverageIgnore
      */
     public function getId(): string
@@ -62,7 +58,6 @@ class Request
     }
 
     /**
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcRequest
      * @codeCoverageIgnore
      */
     public function getJsonRpcRequest(): JsonRpcRequest
@@ -71,8 +66,6 @@ class Request
     }
 
     /**
-     * @param \Tochka\JsonRpcClient\Standard\JsonRpcRequest $request
-     *
      * @codeCoverageIgnore
      */
     public function setJsonRpcRequest(JsonRpcRequest $request): void
@@ -81,7 +74,6 @@ class Request
     }
 
     /**
-     * @return \Tochka\JsonRpcClient\Standard\JsonRpcResponse
      * @codeCoverageIgnore
      */
     public function getJsonRpcResponse(): JsonRpcResponse
@@ -90,8 +82,6 @@ class Request
     }
 
     /**
-     * @param \Tochka\JsonRpcClient\Standard\JsonRpcResponse $response
-     *
      * @throws \Tochka\JsonRpcClient\Exceptions\ResponseException
      */
     public function setJsonRpcResponse(JsonRpcResponse $response): void
@@ -105,7 +95,7 @@ class Request
      */
     protected function parseResult(): void
     {
-        if (!empty($this->jsonRpcResponse->error)) {
+        if (! empty($this->jsonRpcResponse->error)) {
             throw new ResponseException($this->jsonRpcResponse->error);
         }
 

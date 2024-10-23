@@ -6,15 +6,18 @@ use GuzzleHttp\Client;
 use RuntimeException;
 use Tochka\JsonRpcClient\ClientConfig;
 use Tochka\JsonRpcClient\Exceptions\JsonRpcClientException;
-use Tochka\JsonRpcClient\HttpClient;
 use Tochka\JsonRpcSmd\SmdDescription;
 
 class ClientGenerator
 {
     protected $config;
+
     protected $className;
+
     protected $classNamespace;
+
     protected $classFilePath;
+
     /** @var SmdDescription */
     public $smd;
 
@@ -62,14 +65,13 @@ class ClientGenerator
 
     protected function getUri(): string
     {
-        return $this->config->url . '?smd';
+        return $this->config->url.'?smd';
     }
 
     /**
      * Возвращает папку, в которой должен располагаться класс по его namespace
      *
-     * @param string $namespace
-     *
+     * @param  string  $namespace
      * @return bool|string
      */
     private function getNamespaceDirectory($namespace)
@@ -80,10 +82,10 @@ class ClientGenerator
         $undefinedNamespaceFragments = [];
 
         while ($namespaceFragments) {
-            $possibleNamespace = implode('\\', $namespaceFragments) . '\\';
+            $possibleNamespace = implode('\\', $namespaceFragments).'\\';
 
             if (array_key_exists($possibleNamespace, $composerNamespaces)) {
-                $path = app()->basePath() . DIRECTORY_SEPARATOR . $composerNamespaces[$possibleNamespace] . implode('/', array_reverse($undefinedNamespaceFragments));
+                $path = app()->basePath().DIRECTORY_SEPARATOR.$composerNamespaces[$possibleNamespace].implode('/', array_reverse($undefinedNamespaceFragments));
 
                 return $this->getAbsolutePath($path);
             }
@@ -96,14 +98,13 @@ class ClientGenerator
 
     /**
      * Возвращает список объявленных namespace
-     * @return array
      */
     private function getDefinedNamespaces(): array
     {
-        $composerJsonPath = app()->basePath() . DIRECTORY_SEPARATOR . 'composer.json';
+        $composerJsonPath = app()->basePath().DIRECTORY_SEPARATOR.'composer.json';
         $composerConfig = json_decode(file_get_contents($composerJsonPath));
 
-        return (array)$composerConfig->autoload->{'psr-4'};
+        return (array) $composerConfig->autoload->{'psr-4'};
     }
 
     /**
@@ -128,11 +129,11 @@ class ClientGenerator
             throw new RuntimeException('Specified namespace not found.');
         }
 
-        if (!file_exists($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
-            throw new RuntimeException('Can not create folder "' . $directory . '" to save class.');
+        if (! file_exists($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+            throw new RuntimeException('Can not create folder "'.$directory.'" to save class.');
         }
 
-        return $directory . DIRECTORY_SEPARATOR . $className . '.php';
+        return $directory.DIRECTORY_SEPARATOR.$className.'.php';
     }
 
     protected function clearNamespace(string $namespace): void
@@ -146,7 +147,7 @@ class ClientGenerator
 
     private function deleteDirectory(string $directory): void
     {
-        $files = glob($directory . '/*');
+        $files = glob($directory.'/*');
 
         foreach ($files as $file) {
             if (\is_file($file)) {
@@ -167,16 +168,16 @@ class ClientGenerator
         $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), '\strlen');
         $absolutes = [];
         foreach ($parts as $part) {
-            if ('.' === $part) {
+            if ($part === '.') {
                 continue;
             }
-            if ('..' === $part) {
+            if ($part === '..') {
                 array_pop($absolutes);
             } else {
                 $absolutes[] = $part;
             }
         }
 
-        return ($firstSlash ? DIRECTORY_SEPARATOR : '') . implode(DIRECTORY_SEPARATOR, $absolutes);
+        return ($firstSlash ? DIRECTORY_SEPARATOR : '').implode(DIRECTORY_SEPARATOR, $absolutes);
     }
 }
