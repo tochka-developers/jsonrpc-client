@@ -35,51 +35,51 @@ class DefaultQueryPreparerTest extends TestCase
         ]);
     }
 
-    public function providerCastCompoundTypeTo()
+    public static function providerCastCompoundTypeTo()
     {
         return [
-            'type int got int' => [1, $this->wrapType(new Integer), false],
-            'type string got string' => ['1', $this->wrapType(new String_), false],
-            'type null got null' => [null, $this->wrapType(new Null_), false],
-            'type bool got bool' => [true, $this->wrapType(new Boolean), false],
-            'type float got float' => [0.5, $this->wrapType(new Float_), false],
-            'type object got object' => [new \stdClass, $this->wrapType(new Object_), false],
-            'type array got array' => [[], $this->wrapType(new Array_), false],
-            'type \stdClass got \stdClass' => [new \stdClass, $this->wrapType(new Object_), false],
+            'type int got int' => [1, self::wrapType(new Integer), false],
+            'type string got string' => ['1', self::wrapType(new String_), false],
+            'type null got null' => [null, self::wrapType(new Null_), false],
+            'type bool got bool' => [true, self::wrapType(new Boolean), false],
+            'type float got float' => [0.5, self::wrapType(new Float_), false],
+            'type object got object' => [new \stdClass, self::wrapType(new Object_), false],
+            'type array got array' => [[], self::wrapType(new Array_), false],
+            'type \stdClass got \stdClass' => [new \stdClass, self::wrapType(new Object_), false],
             // compound
-            'type int|null got int' => [1, $this->wrapType(new Compound([new Integer, new Null_])), false],
+            'type int|null got int' => [1, self::wrapType(new Compound([new Integer, new Null_])), false],
             'type int|null got null' => [
                 null,
-                $this->wrapType(new Compound([new Integer, new Null_])),
+                self::wrapType(new Compound([new Integer, new Null_])),
                 false,
             ],
-            'type string|null got string' => ['1', $this->wrapType(new Compound([new String_, new Null_])), false],
+            'type string|null got string' => ['1', self::wrapType(new Compound([new String_, new Null_])), false],
             'type string|null got null' => [
                 null,
-                $this->wrapType(new Compound([new String_, new Null_])),
+                self::wrapType(new Compound([new String_, new Null_])),
                 false,
             ],
-            'type array|\\stdClass got array' => [[], $this->wrapType(new Compound([new Array_, new Object_])), false],
+            'type array|\\stdClass got array' => [[], self::wrapType(new Compound([new Array_, new Object_])), false],
             // errors
-            'type int|null got string' => ['1', $this->wrapType(new Compound([new Integer, new Null_])), true],
-            'type int|float got string' => ['1', $this->wrapType(new Compound([new Integer, new Float_])), true],
-            'type int got string' => ['1', $this->wrapType(new Integer), true],
-            'type object got array' => [[], $this->wrapType(new Object_), true],
-            'type array got object' => [new \stdClass, $this->wrapType(new Array_), true],
+            'type int|null got string' => ['1', self::wrapType(new Compound([new Integer, new Null_])), true],
+            'type int|float got string' => ['1', self::wrapType(new Compound([new Integer, new Float_])), true],
+            'type int got string' => ['1', self::wrapType(new Integer), true],
+            'type object got array' => [[], self::wrapType(new Object_), true],
+            'type array got object' => [new \stdClass, self::wrapType(new Array_), true],
             'type int|bool|null got array' => [
                 [],
-                $this->wrapType(new Compound([new Integer, new Boolean, new Null_])),
+                self::wrapType(new Compound([new Integer, new Boolean, new Null_])),
                 true,
             ],
             // nullable
-            'type nullable' => [1, $this->wrapType(new Nullable(new Integer)), false],
-            'type nullable null' => [null, $this->wrapType(new Nullable(new Integer)), false],
-            'type nullable bad type' => ['string', $this->wrapType(new Nullable(new Integer)), true],
-            'mixed' => ['chot', $this->wrapType(new Mixed_), false],
+            'type nullable' => [1, self::wrapType(new Nullable(new Integer)), false],
+            'type nullable null' => [null, self::wrapType(new Nullable(new Integer)), false],
+            'type nullable bad type' => ['string', self::wrapType(new Nullable(new Integer)), true],
+            'mixed' => ['chot', self::wrapType(new Mixed_), false],
         ];
     }
 
-    protected function wrapType($type)
+    protected static function wrapType($type)
     {
         return ['name' => 'name', 'type' => $type];
     }
@@ -115,7 +115,7 @@ class DefaultQueryPreparerTest extends TestCase
         ]);
     }
 
-    public function providerMapMethods()
+    public static function providerMapMethods(): array
     {
         return [
             'name_intMethod' => ['name_intMethod', ['int']],
@@ -143,7 +143,7 @@ class DefaultQueryPreparerTest extends TestCase
         /** @var Method $resultMethod */
         $resultMethod = $this->getProperty($preparer, 'methods')[$methodName];
         $resultAttributes = $resultMethod->getArguments();
-        for ($i = 0; $i < count($resultAttributes); $i++) {
+        for ($i = 0, $iMax = count($resultAttributes); $i < $iMax; $i++) {
             $this->assertEquals($types[$i], (string) $resultAttributes[$i]['type']);
         }
     }
