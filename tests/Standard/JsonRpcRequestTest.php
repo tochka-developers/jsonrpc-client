@@ -22,4 +22,17 @@ class JsonRpcRequestTest extends TestCase
         $this->assertEquals($params, $result['params']);
         $this->assertEquals(123, $result['id']);
     }
+
+    /**
+     * If "params" is empty, it should be excluded from serialization.
+     */
+    public function test_exclude_empty_params(): void
+    {
+        $emptyParams = [];
+        $instance = new JsonRpcRequest('test', $emptyParams, 123);
+
+        $result = $instance->toArray();
+
+        $this->assertArrayNotHasKey('params', $result);
+    }
 }
