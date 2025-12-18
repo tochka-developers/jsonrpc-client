@@ -31,11 +31,14 @@ class JsonRpcRequest implements Arrayable
         $result = [
             'jsonrpc' => '2.0',
             'method' => $this->method,
-            'params' => $this->params,
         ];
 
         if ($this->id !== null) {
             $result['id'] = $this->id;
+        }
+
+        if (! empty($this->params)) {
+            $result['params'] = $this->params;
         }
 
         return $result;
