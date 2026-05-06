@@ -4,8 +4,8 @@ namespace Tochka\JsonRpcClient\DocBlock;
 
 use phpDocumentor\Reflection\DocBlock\Description;
 use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
+use phpDocumentor\Reflection\DocBlock\Tag;
 use phpDocumentor\Reflection\DocBlock\Tags\BaseTag;
-use phpDocumentor\Reflection\DocBlock\Tags\Factory\StaticMethod;
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Context as TypeContext;
@@ -14,7 +14,7 @@ use Webmozart\Assert\Assert;
 /**
  * Reflection class for the {@}apiObject tag in a Docblock.
  */
-class Method extends BaseTag implements StaticMethod
+class Method extends BaseTag implements Tag
 {
     protected const REGEXP_METHOD = /** @lang text */
         '/((?<isStatic>static)? +)?(?<type>([a-z\[\]\_]+)[ ]+)?(?<methodName>[a-z0-9\_]+)\((?<arguments>[^\)]*)\)[ \n]*(?<description>.+)?/is';
