@@ -22,7 +22,7 @@ class JsonRpcClientServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__.'/../config/jsonrpc-client.php' => base_path('config/jsonrpc-client.php'),
+            __DIR__ . '/../config/jsonrpc-client.php' => base_path('config/jsonrpc-client.php'),
         ], 'config');
     }
 
@@ -33,7 +33,7 @@ class JsonRpcClientServiceProvider extends ServiceProvider
         $defaultTimeout = config('jsonrpc-client.defaultTimeout', null);
 
         $this->app->singleton(MiddlewareRegistryInterface::class, function () use ($services, $clientName) {
-            $middlewareRegistry = new MiddlewareRegistry;
+            $middlewareRegistry = new MiddlewareRegistry();
             foreach ($services as $alias => $serviceConfig) {
                 $config = new ClientConfig($clientName, $alias, $serviceConfig);
                 $middlewareRegistry->setMiddleware($alias, $config->middleware, $config->onceExecutedMiddleware);

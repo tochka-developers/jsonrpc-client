@@ -23,7 +23,7 @@ class EnumClass extends AbstractClass implements Stub
         parent::__construct($parentClass, $className, $classNamespace);
 
         if ($alias) {
-            $this->aliasName = $parentClass->className.'_'.$className;
+            $this->aliasName = $parentClass->className . '_' . $className;
         }
         $this->values = $values;
         $this->type = $type;
@@ -40,7 +40,7 @@ class EnumClass extends AbstractClass implements Stub
 
     public static function fromProperty(AbstractClass $baseClass, SmdParameter $parameter, bool $alias = false)
     {
-        $className = studly_case($parameter->name).'Enum';
+        $className = studly_case($parameter->name) . 'Enum';
 
         $type = implode('|', $parameter->types);
 
@@ -91,10 +91,10 @@ php;
     protected function getConstants()
     {
         return implode("\n", array_map(function ($value) {
-            $phpDoc = '    /** @var '.$this->type.(isset($value['description']) ? ' '.$value['description'] : '').' */';
-            $constant = '    public const '.$value['name'].' = '.var_export($value['value'], true).';';
+            $phpDoc = '    /** @var ' . $this->type . (isset($value['description']) ? ' ' . $value['description'] : '') . ' */';
+            $constant = '    public const ' . $value['name'] . ' = ' . var_export($value['value'], true) . ';';
 
-            return $phpDoc."\n".$constant;
+            return $phpDoc . "\n" . $constant;
         }, $this->constants));
     }
 

@@ -21,7 +21,7 @@ class HttpClient implements TransportClient
     public function __construct($options = [])
     {
         $this->options = $options;
-        $this->client = new Client;
+        $this->client = new Client();
     }
 
     /**

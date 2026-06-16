@@ -36,7 +36,7 @@ class GenerateClient extends Command
      */
     protected function generate(string $connection): void
     {
-        $this->info('Generate client class for connection: '.$connection);
+        $this->info('Generate client class for connection: ' . $connection);
 
         $services = config('jsonrpc-client.connections', []);
         $clientName = config('jsonrpc-client.clientName', []);

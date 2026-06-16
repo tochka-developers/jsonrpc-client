@@ -16,11 +16,11 @@ use Webmozart\Assert\Assert;
  */
 class Method extends BaseTag implements Tag
 {
-    protected const REGEXP_METHOD = /** @lang text */
-        '/((?<isStatic>static)? +)?(?<type>([a-z\[\]\_]+)[ ]+)?(?<methodName>[a-z0-9\_]+)\((?<arguments>[^\)]*)\)[ \n]*(?<description>.+)?/is';
+    protected const REGEXP_METHOD /** @lang text */
+        = '/((?<isStatic>static)? +)?(?<type>([a-z\[\]\_]+)[ ]+)?(?<methodName>[a-z0-9\_]+)\((?<arguments>[^\)]*)\)[ \n]*(?<description>.+)?/is';
 
-    protected const REGEXP_ARGUMENT = /** @lang text */
-        '/(?<type>(\??[\\a-z\[\]\_|]+)[ ]+)?\$(?<argumentName>[a-z0-9\_]+)(\s*=\s*)?(?<default>(\S*))/is';
+    protected const REGEXP_ARGUMENT /** @lang text */
+        = '/(?<type>(\??[\\a-z\[\]\_|]+)[ ]+)?\$(?<argumentName>[a-z0-9\_]+)(\s*=\s*)?(?<default>(\S*))/is';
 
     protected const TAG_NAME = 'method';
 
@@ -36,12 +36,13 @@ class Method extends BaseTag implements Tag
     /** @var Type */
     protected $returnType;
 
-    public function __construct(string $methodName,
+    public function __construct(
+        string $methodName,
         array $arguments = [],
         ?Type $returnType = null,
         bool $static = false,
-        ?Description $description = null)
-    {
+        ?Description $description = null,
+    ) {
         Assert::stringNotEmpty($methodName);
 
         $this->name = self::TAG_NAME;
@@ -59,7 +60,7 @@ class Method extends BaseTag implements Tag
         $body,
         ?TypeResolver $typeResolver = null,
         ?DescriptionFactory $descriptionFactory = null,
-        ?TypeContext $context = null
+        ?TypeContext $context = null,
     ) {
         Assert::stringNotEmpty($body);
         Assert::allNotNull([$typeResolver, $descriptionFactory]);
@@ -92,7 +93,7 @@ class Method extends BaseTag implements Tag
                 // if T $value = null, make T|null $value
                 if (($matches['default'] ?? null) === 'null' && $matches['type'] ?? false) {
                     if (strpos($matches['type'], '?') === false && strpos($matches['type'], 'null') === false) {
-                        $matches['type'] = trim($matches['type']).'|null';
+                        $matches['type'] = trim($matches['type']) . '|null';
                     }
                 }
 
@@ -150,13 +151,13 @@ class Method extends BaseTag implements Tag
     {
         $arguments = [];
         foreach ($this->arguments as $argument) {
-            $arguments[] = $argument['type'].' $'.$argument['name'];
+            $arguments[] = $argument['type'] . ' $' . $argument['name'];
         }
 
         return trim(($this->isStatic() ? 'static ' : '')
-            .$this->returnType.' '
-            .$this->methodName
-            .'('.implode(', ', $arguments).')'
-            .($this->description ? ' '.$this->description->render() : ''));
+            . $this->returnType . ' '
+            . $this->methodName
+            . '(' . implode(', ', $arguments) . ')'
+            . ($this->description ? ' ' . $this->description->render() : ''));
     }
 }

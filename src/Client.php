@@ -54,8 +54,8 @@ class Client
      */
     public function __call($method, $params)
     {
-        if (method_exists($this, '_'.$method)) {
-            return $this->{'_'.$method}(...$params);
+        if (method_exists($this, '_' . $method)) {
+            return $this->{'_' . $method}(...$params);
         }
 
         return $this->_call($method, $params);
@@ -159,8 +159,8 @@ class Client
                     return ($request->getResult() instanceof Result)
                         ? $request->getJsonRpcRequest()
                         : null;
-                }, $this->requests)
-            )
+                }, $this->requests),
+            ),
         );
 
         try {
@@ -201,7 +201,7 @@ class Client
         return array_values(
             array_map(static function (Result $item) {
                 return $item->get();
-            }, $this->results)
+            }, $this->results),
         );
     }
 

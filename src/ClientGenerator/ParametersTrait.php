@@ -15,9 +15,9 @@ trait ParametersTrait
             if ($this->extendedStubs) {
                 $type = $this->getObjectParameter($parameter, $withAlias);
 
-                $type .= (! empty($parameter->array) ? '[]' : '').'|object'.(! empty($parameter->array) ? '[]' : '').'|array';
+                $type .= (! empty($parameter->array) ? '[]' : '') . '|object' . (! empty($parameter->array) ? '[]' : '') . '|array';
             } else {
-                $type = 'object'.(! empty($parameter->array) ? '[]' : '').'|array';
+                $type = 'object' . (! empty($parameter->array) ? '[]' : '') . '|array';
             }
 
         } elseif (! empty($parameter->typeAdditional)) {
@@ -27,7 +27,7 @@ trait ParametersTrait
                 if ($this->extendedStubs) {
                     $type = $this->getEnumParameter($parameter, $withAlias);
 
-                    $type .= (! empty($parameter->array) ? '[]' : '').'|'.$this->getTypes($parameter);
+                    $type .= (! empty($parameter->array) ? '[]' : '') . '|' . $this->getTypes($parameter);
                 } else {
                     $type = $this->getTypes($parameter);
                 }
@@ -42,14 +42,14 @@ trait ParametersTrait
                     $type .= ! empty($parameter->array) ? '[]' : '';
 
                     if ($class instanceof EnumClass) {
-                        $type .= '|'.$class->type.(! empty($parameter->array) ? '[]' : '');
+                        $type .= '|' . $class->type . (! empty($parameter->array) ? '[]' : '');
                     } else {
-                        $type .= '|object'.(! empty($parameter->array) ? '[]' : '').'|array';
+                        $type .= '|object' . (! empty($parameter->array) ? '[]' : '') . '|array';
                     }
 
                 }
             } else {
-                $type = 'object'.(! empty($parameter->array) ? '[]' : '').'|array';
+                $type = 'object' . (! empty($parameter->array) ? '[]' : '') . '|array';
             }
         } elseif (! empty($parameter->types)) {
             // если указано несколько типов
@@ -89,7 +89,7 @@ trait ParametersTrait
 
                 $type .= (! empty($parameter->array) ? '[]' : '');
             } else {
-                $type = 'object'.(! empty($parameter->array) ? '[]' : '').'|array';
+                $type = 'object' . (! empty($parameter->array) ? '[]' : '') . '|array';
             }
 
         } elseif (! empty($parameter->typeAdditional)) {
@@ -112,12 +112,12 @@ trait ParametersTrait
                     $type .= ! empty($parameter->array) ? '[]' : '';
 
                     if ($class instanceof EnumClass) {
-                        $type = $class->type.(! empty($parameter->array) ? '[]' : '');
+                        $type = $class->type . (! empty($parameter->array) ? '[]' : '');
                     }
 
                 }
             } else {
-                $type = 'object'.(! empty($parameter->array) ? '[]' : '').'|array';
+                $type = 'object' . (! empty($parameter->array) ? '[]' : '') . '|array';
             }
         } elseif (! empty($parameter->types)) {
             // если указано несколько типов
@@ -139,7 +139,7 @@ trait ParametersTrait
 
         if (! empty($parameter->array)) {
             $types = array_map(function ($value) {
-                return $value.'[]';
+                return $value . '[]';
             }, $parameter->types);
         }
 

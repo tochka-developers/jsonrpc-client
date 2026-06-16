@@ -21,7 +21,7 @@ class JsonRpcClientException extends \Exception
     public function __construct(int $code = 0, ?string $message = null, ?Throwable $previous = null)
     {
         if ($message === null) {
-            $message = self::MESSAGES[$code] ?? 'Unknown error. Code '.$code;
+            $message = self::MESSAGES[$code] ?? 'Unknown error. Code ' . $code;
         }
 
         parent::__construct($message, $code, $previous);

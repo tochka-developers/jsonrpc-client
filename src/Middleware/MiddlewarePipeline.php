@@ -92,7 +92,7 @@ class MiddlewarePipeline extends Pipeline
             $type = $reflectionParameters[$i]->getType();
             if ($type === null || $type->isBuiltin()) {
                 if (! $reflectionParameters[$i]->isOptional()) {
-                    throw new JsonRpcClientException(0, 'Error while handling middleware: unknown parameter '.$reflectionParamName);
+                    throw new JsonRpcClientException(0, 'Error while handling middleware: unknown parameter ' . $reflectionParamName);
                 }
 
                 // получим значение аргумента по умолчанию

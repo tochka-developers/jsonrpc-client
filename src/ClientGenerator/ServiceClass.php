@@ -31,7 +31,7 @@ class ServiceClass extends AbstractClass
         foreach ($this->method->parameters as $parameter) {
             [$name, $type, $default] = $this->getParameterInfo($parameter, true);
 
-            $parameters[] = ($type !== null ? $type.' ' : '').'$'.$name.($default !== null ? ' = '.$default : '');
+            $parameters[] = ($type !== null ? $type . ' ' : '') . '$' . $name . ($default !== null ? ' = ' . $default : '');
         }
         $parameters = implode(', ', $parameters);
 

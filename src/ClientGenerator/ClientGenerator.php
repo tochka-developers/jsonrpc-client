@@ -65,7 +65,7 @@ class ClientGenerator
 
     protected function getUri(): string
     {
-        return $this->config->url.'?smd';
+        return $this->config->url . '?smd';
     }
 
     /**
@@ -82,10 +82,10 @@ class ClientGenerator
         $undefinedNamespaceFragments = [];
 
         while ($namespaceFragments) {
-            $possibleNamespace = implode('\\', $namespaceFragments).'\\';
+            $possibleNamespace = implode('\\', $namespaceFragments) . '\\';
 
             if (array_key_exists($possibleNamespace, $composerNamespaces)) {
-                $path = app()->basePath().DIRECTORY_SEPARATOR.$composerNamespaces[$possibleNamespace].implode('/', array_reverse($undefinedNamespaceFragments));
+                $path = app()->basePath() . DIRECTORY_SEPARATOR . $composerNamespaces[$possibleNamespace] . implode('/', array_reverse($undefinedNamespaceFragments));
 
                 return $this->getAbsolutePath($path);
             }
@@ -101,7 +101,7 @@ class ClientGenerator
      */
     private function getDefinedNamespaces(): array
     {
-        $composerJsonPath = app()->basePath().DIRECTORY_SEPARATOR.'composer.json';
+        $composerJsonPath = app()->basePath() . DIRECTORY_SEPARATOR . 'composer.json';
         $composerConfig = json_decode(file_get_contents($composerJsonPath));
 
         return (array) $composerConfig->autoload->{'psr-4'};
@@ -130,10 +130,10 @@ class ClientGenerator
         }
 
         if (! file_exists($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
-            throw new RuntimeException('Can not create folder "'.$directory.'" to save class.');
+            throw new RuntimeException('Can not create folder "' . $directory . '" to save class.');
         }
 
-        return $directory.DIRECTORY_SEPARATOR.$className.'.php';
+        return $directory . DIRECTORY_SEPARATOR . $className . '.php';
     }
 
     protected function clearNamespace(string $namespace): void
@@ -147,7 +147,7 @@ class ClientGenerator
 
     private function deleteDirectory(string $directory): void
     {
-        $files = glob($directory.'/*');
+        $files = glob($directory . '/*');
 
         foreach ($files as $file) {
             if (\is_file($file)) {
@@ -178,6 +178,6 @@ class ClientGenerator
             }
         }
 
-        return ($firstSlash ? DIRECTORY_SEPARATOR : '').implode(DIRECTORY_SEPARATOR, $absolutes);
+        return ($firstSlash ? DIRECTORY_SEPARATOR : '') . implode(DIRECTORY_SEPARATOR, $absolutes);
     }
 }

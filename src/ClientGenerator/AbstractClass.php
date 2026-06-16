@@ -39,11 +39,11 @@ abstract class AbstractClass
     {
         return implode("\n", array_map(function ($value) {
             if (isset($value['aliasName'])) {
-                return 'use '.$value['className'].' as '.$value['aliasName'].';';
+                return 'use ' . $value['className'] . ' as ' . $value['aliasName'] . ';';
             }
 
-            return 'use '.$value['className'].';';
-        }, $this->uses))."\n";
+            return 'use ' . $value['className'] . ';';
+        }, $this->uses)) . "\n";
     }
 
     public function addUse(AbstractClass $class): void
@@ -104,9 +104,9 @@ abstract class AbstractClass
 
     public function getFullClassName(?string $namespacePostfix = null): string
     {
-        $result = $this->classNamespace.'\\'.$this->className;
+        $result = $this->classNamespace . '\\' . $this->className;
         if ($namespacePostfix !== null) {
-            $result .= '\\'.$namespacePostfix;
+            $result .= '\\' . $namespacePostfix;
         }
 
         return $result;
