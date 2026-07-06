@@ -20,7 +20,7 @@ class AuthTokenMiddleware implements OnceExecutedMiddleware
         \Closure $next,
         TransportClient $client,
         $value,
-        $name = 'X-Access-Key'
+        $name = 'X-Access-Key',
     ) {
         if (! $client instanceof HttpClient) {
             return $next($requests);

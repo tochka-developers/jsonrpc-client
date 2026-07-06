@@ -94,7 +94,7 @@ php;
                         $ln = mb_strlen($method->groupName);
                         $delimiter = str_pad('', $ln + 20, '=');
                         $source[] = $delimiter;
-                        $source[] = str_pad('', 10).$method->groupName;
+                        $source[] = str_pad('', 10) . $method->groupName;
                         $source[] = $delimiter;
                     }
                 }

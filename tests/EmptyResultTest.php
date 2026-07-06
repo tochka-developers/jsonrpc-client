@@ -12,7 +12,7 @@ class EmptyResultTest extends TestCase
      */
     public function test_to_string(): void
     {
-        $instance = new Result;
+        $instance = new Result();
 
         $this->assertEquals('The response has not yet been initialized', (string) $instance);
     }

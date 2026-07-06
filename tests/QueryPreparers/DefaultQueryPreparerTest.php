@@ -38,44 +38,44 @@ class DefaultQueryPreparerTest extends TestCase
     public static function providerCastCompoundTypeTo()
     {
         return [
-            'type int got int' => [1, self::wrapType(new Integer), false],
-            'type string got string' => ['1', self::wrapType(new String_), false],
-            'type null got null' => [null, self::wrapType(new Null_), false],
-            'type bool got bool' => [true, self::wrapType(new Boolean), false],
-            'type float got float' => [0.5, self::wrapType(new Float_), false],
-            'type object got object' => [new \stdClass, self::wrapType(new Object_), false],
-            'type array got array' => [[], self::wrapType(new Array_), false],
-            'type \stdClass got \stdClass' => [new \stdClass, self::wrapType(new Object_), false],
+            'type int got int' => [1, self::wrapType(new Integer()), false],
+            'type string got string' => ['1', self::wrapType(new String_()), false],
+            'type null got null' => [null, self::wrapType(new Null_()), false],
+            'type bool got bool' => [true, self::wrapType(new Boolean()), false],
+            'type float got float' => [0.5, self::wrapType(new Float_()), false],
+            'type object got object' => [new \stdClass(), self::wrapType(new Object_()), false],
+            'type array got array' => [[], self::wrapType(new Array_()), false],
+            'type \stdClass got \stdClass' => [new \stdClass(), self::wrapType(new Object_()), false],
             // compound
-            'type int|null got int' => [1, self::wrapType(new Compound([new Integer, new Null_])), false],
+            'type int|null got int' => [1, self::wrapType(new Compound([new Integer(), new Null_()])), false],
             'type int|null got null' => [
                 null,
-                self::wrapType(new Compound([new Integer, new Null_])),
+                self::wrapType(new Compound([new Integer(), new Null_()])),
                 false,
             ],
-            'type string|null got string' => ['1', self::wrapType(new Compound([new String_, new Null_])), false],
+            'type string|null got string' => ['1', self::wrapType(new Compound([new String_(), new Null_()])), false],
             'type string|null got null' => [
                 null,
-                self::wrapType(new Compound([new String_, new Null_])),
+                self::wrapType(new Compound([new String_(), new Null_()])),
                 false,
             ],
-            'type array|\\stdClass got array' => [[], self::wrapType(new Compound([new Array_, new Object_])), false],
+            'type array|\\stdClass got array' => [[], self::wrapType(new Compound([new Array_(), new Object_()])), false],
             // errors
-            'type int|null got string' => ['1', self::wrapType(new Compound([new Integer, new Null_])), true],
-            'type int|float got string' => ['1', self::wrapType(new Compound([new Integer, new Float_])), true],
-            'type int got string' => ['1', self::wrapType(new Integer), true],
-            'type object got array' => [[], self::wrapType(new Object_), true],
-            'type array got object' => [new \stdClass, self::wrapType(new Array_), true],
+            'type int|null got string' => ['1', self::wrapType(new Compound([new Integer(), new Null_()])), true],
+            'type int|float got string' => ['1', self::wrapType(new Compound([new Integer(), new Float_()])), true],
+            'type int got string' => ['1', self::wrapType(new Integer()), true],
+            'type object got array' => [[], self::wrapType(new Object_()), true],
+            'type array got object' => [new \stdClass(), self::wrapType(new Array_()), true],
             'type int|bool|null got array' => [
                 [],
-                self::wrapType(new Compound([new Integer, new Boolean, new Null_])),
+                self::wrapType(new Compound([new Integer(), new Boolean(), new Null_()])),
                 true,
             ],
             // nullable
-            'type nullable' => [1, self::wrapType(new Nullable(new Integer)), false],
-            'type nullable null' => [null, self::wrapType(new Nullable(new Integer)), false],
-            'type nullable bad type' => ['string', self::wrapType(new Nullable(new Integer)), true],
-            'mixed' => ['chot', self::wrapType(new Mixed_), false],
+            'type nullable' => [1, self::wrapType(new Nullable(new Integer())), false],
+            'type nullable null' => [null, self::wrapType(new Nullable(new Integer())), false],
+            'type nullable bad type' => ['string', self::wrapType(new Nullable(new Integer())), true],
+            'mixed' => ['chot', self::wrapType(new Mixed_()), false],
         ];
     }
 
@@ -94,7 +94,7 @@ class DefaultQueryPreparerTest extends TestCase
         if ($expectException) {
             $this->expectException(JsonRpcClientException::class);
         }
-        $preparer = new DefaultQueryPreparer;
+        $preparer = new DefaultQueryPreparer();
         $this->callMethod($preparer, 'checkType', [$value, $type, 'method']);
         $this->assertTrue(true);
     }
@@ -106,7 +106,7 @@ class DefaultQueryPreparerTest extends TestCase
     public function test_map_methods_class_not_found()
     {
         $this->expectException(JsonRpcClientException::class);
-        $preparer = new DefaultQueryPreparer;
+        $preparer = new DefaultQueryPreparer();
         $this->callMethod($preparer, 'mapMethods', [
             new ClientConfig('name', 'service', [
                 'clientClass' => '',
@@ -138,7 +138,7 @@ class DefaultQueryPreparerTest extends TestCase
      */
     public function test_map_methods(string $methodName, array $types)
     {
-        $preparer = new DefaultQueryPreparer;
+        $preparer = new DefaultQueryPreparer();
         $this->callMethod($preparer, 'mapMethods', [$this->makeConfig()]);
         /** @var Method $resultMethod */
         $resultMethod = $this->getProperty($preparer, 'methods')[$methodName];
@@ -157,7 +157,7 @@ class DefaultQueryPreparerTest extends TestCase
     public function test_prepare_method_not_found()
     {
         $this->expectException(JsonRpcClientException::class);
-        $preparer = new DefaultQueryPreparer;
+        $preparer = new DefaultQueryPreparer();
         $this->setProperty($preparer, 'methods', ['one' => '']);
         $preparer->prepare('name', [], $this->makeConfig());
     }
@@ -170,11 +170,11 @@ class DefaultQueryPreparerTest extends TestCase
      */
     public function test_prepare()
     {
-        $preparer = new DefaultQueryPreparer;
+        $preparer = new DefaultQueryPreparer();
         $this->setProperty($preparer, 'methods', [
             'one' => new Method('one', [
-                ['name' => 'first', 'type' => new Integer],
-                ['name' => 'second', 'type' => new String_],
+                ['name' => 'first', 'type' => new Integer()],
+                ['name' => 'second', 'type' => new String_()],
             ]),
         ]);
         $jsonRpcRequest = $preparer->prepare('one', [5, '6'], $this->makeConfig());
@@ -191,7 +191,7 @@ class DefaultQueryPreparerTest extends TestCase
      */
     public function test_prepare_map_methods_if_not_mapped()
     {
-        $preparer = new DefaultQueryPreparer;
+        $preparer = new DefaultQueryPreparer();
         $preparer->prepare('name_intMethod', [5, '6'], $this->makeConfig());
         $this->assertNotEmpty($this->getProperty($preparer, 'methods'));
     }

@@ -38,7 +38,7 @@ class ClientConfig
         $this->serviceName = $serviceName;
 
         if (! isset($clientConfig['url'], $clientConfig['clientClass'])) {
-            throw new JsonRpcClientException(0, 'Connection configuration mismatch for: '.$serviceName);
+            throw new JsonRpcClientException(0, 'Connection configuration mismatch for: ' . $serviceName);
         }
 
         $this->url = $clientConfig['url'];

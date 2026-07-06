@@ -35,7 +35,7 @@ class DefaultQueryPreparer implements QueryPreparer
         try {
             $reflection = new \ReflectionClass($clientFacade);
         } catch (\ReflectionException $e) {
-            throw new JsonRpcClientException(0, 'Cannot parse proxy class DocBlock: '.$e->getMessage());
+            throw new JsonRpcClientException(0, 'Cannot parse proxy class DocBlock: ' . $e->getMessage());
         }
 
         $docs = $reflection->getDocComment();
@@ -61,7 +61,7 @@ class DefaultQueryPreparer implements QueryPreparer
                 $typesArray[] = $item;
             }
         } elseif ($type instanceof Nullable) {
-            $typesArray[] = new Null_;
+            $typesArray[] = new Null_();
             $typesArray[] = $type->getActualType();
         } else {
             $typesArray[] = $type;
@@ -83,9 +83,11 @@ class DefaultQueryPreparer implements QueryPreparer
             }
         }
 
-        $messageType = 'expected '.(string) $type.' got '.gettype($value).' in method '.$method;
-        throw new JsonRpcClientException(0,
-            'Error while mapping jsonrpc client method parameter: '.$argumentName.', '.$messageType);
+        $messageType = 'expected ' . (string) $type . ' got ' . gettype($value) . ' in method ' . $method;
+        throw new JsonRpcClientException(
+            0,
+            'Error while mapping jsonrpc client method parameter: ' . $argumentName . ', ' . $messageType,
+        );
     }
 
     /**

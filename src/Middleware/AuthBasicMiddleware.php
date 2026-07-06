@@ -23,7 +23,7 @@ class AuthBasicMiddleware implements OnceExecutedMiddleware
         TransportClient $client,
         $username = '',
         $password = '',
-        $scheme = 'basic'
+        $scheme = 'basic',
     ) {
         if (! $client instanceof HttpClient) {
             return $next($requests);

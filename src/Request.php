@@ -21,7 +21,7 @@ class Request
     public function __construct(JsonRpcRequest $request)
     {
         $this->jsonRpcRequest = $request;
-        $this->result = new Result;
+        $this->result = new Result();
     }
 
     /**

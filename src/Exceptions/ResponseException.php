@@ -12,7 +12,7 @@ class ResponseException extends JsonRpcClientException
     public function __construct(JsonRpcError $responseError, ?Throwable $previous = null)
     {
         $code = $responseError->code ?? 0;
-        $message = $responseError->message ?? JsonRpcError::MESSAGES[$code] ?? 'Unknown error. Code '.$code;
+        $message = $responseError->message ?? JsonRpcError::MESSAGES[$code] ?? 'Unknown error. Code ' . $code;
         $this->data = $responseError->data ?? null;
 
         parent::__construct($code, $message, $previous);

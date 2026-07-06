@@ -21,7 +21,7 @@ class SubClass extends AbstractClass implements Stub
         parent::__construct($parentClass, $className, $classNamespace);
 
         if ($alias) {
-            $this->aliasName = $parentClass->className.'_'.$className;
+            $this->aliasName = $parentClass->className . '_' . $className;
         }
         $this->parameters = $parameters;
 
@@ -33,7 +33,7 @@ class SubClass extends AbstractClass implements Stub
         if (! empty($parameter->typeAdditional)) {
             $className = $parameter->typeAdditional;
         } else {
-            $className = studly_case($parameter->name).$postfix;
+            $className = studly_case($parameter->name) . $postfix;
         }
 
         $instance = new self($baseClass, $className, $baseClass->getFullClassName(), $parameter->parameters, $alias);
@@ -84,10 +84,10 @@ php;
     protected function getProperties()
     {
         return implode("\n", array_map(function ($value) {
-            $phpDoc = '    /** @var '.$value['type'].(isset($value['description']) ? ' '.$value['description'] : '').' */';
-            $property = '    public $'.$value['name'].(isset($value['default']) ? ' = '.$value['default'] : '').';';
+            $phpDoc = '    /** @var ' . $value['type'] . (isset($value['description']) ? ' ' . $value['description'] : '') . ' */';
+            $property = '    public $' . $value['name'] . (isset($value['default']) ? ' = ' . $value['default'] : '') . ';';
 
-            return $phpDoc."\n".$property;
+            return $phpDoc . "\n" . $property;
         }, $this->properties));
     }
 
